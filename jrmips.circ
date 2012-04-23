@@ -5,23 +5,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <tool name="Splitter">
       <a name="fanout" val="3"/>
       <a name="incoming" val="3"/>
-    </tool>
-    <tool name="Pin">
-      <a name="output" val="true"/>
-      <a name="width" val="2"/>
-    </tool>
-    <tool name="Constant">
-      <a name="width" val="2"/>
-      <a name="value" val="0x0"/>
-    </tool>
-    <tool name="Bit Extender">
-      <a name="in_width" val="1"/>
-      <a name="type" val="sign"/>
-    </tool>
-  </lib>
-  <lib desc="#Gates" name="1">
-    <tool name="NOT Gate">
-      <a name="size" val="20"/>
+Now I made some changes
     </tool>
     <tool name="AND Gate">
       <a name="size" val="30"/>
