@@ -10,10 +10,6 @@ public class problem21
 { 
 	public static void main(String [] args)
 	{
-		BigInteger ans = new BigInteger("0");	
-		BigInteger curr = new BigInteger("1");
-		BigInteger temp = new BigInteger("0");
-		
 		int sum = 0, a = 0, b = 0;
 		for (int i = 0; i < 10000; i++)
 		{
