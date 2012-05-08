@@ -12,19 +12,16 @@ int main()
 	
 	ofstream fout(filename.c_str());
 	
-	bool done = false;
 	string input;
 	int lineNum = 0;
-	//s
 	
-	while (!done)
+	while (input != "done")
 	{
 		cin.clear();
 		lineNum++;
 		getline(cin, input);
-		fout << lineNum << ": " << input << "\n";
-		if (input == "done")
-			done = true;
+		if (input != "done")
+			fout << lineNum << ": " << input << "\n";
 	}
 
 	fout.close();
