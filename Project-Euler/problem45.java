@@ -8,16 +8,10 @@ public class problem45
 { 
 	public static void main(String [] args)
 	{
-		long triNum = 0;
-		
-		for (int i = 0; i < 100000; i++)
-		{
-			
-			triNum += i;
-			if (isPentagonal(triNum) && isHexagonal(triNum))
+		for (long i = 0, triNum = 0; i < 100000; triNum += ++i)
+			if (isPentagonal(triNum))
+				if (isHexagonal(triNum))
 				System.out.println("Got one: " + triNum);
-		}	
-		
 	}
 
 	public static boolean isPentagonal(long n)
@@ -35,5 +29,4 @@ public class problem45
 				return true;
 		return false;
 	}
-	
 }
