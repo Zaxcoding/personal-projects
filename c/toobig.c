@@ -10,6 +10,6 @@ int main(void)
 	
 	printf("%d %d %d\n%#x %#x %#x\n\n", i, i+1, i+2, i, i+1, i+2);
 	printf("%u %u %u\n%#x %#x %#x\n\n", j, j+1, j+2, j, j+1, j+2);
-	
+		
 	return 0;
 }
