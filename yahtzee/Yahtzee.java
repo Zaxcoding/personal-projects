@@ -19,6 +19,7 @@ public class Yahtzee
 	MyPanel buttonPanel, leftPanel, dicePanel, scorePanel;
 	MyPanel grid [];
 	JLabel boxes [][]; 
+	JLabel currRoll, highScore;
 	JButton buttons [];
 	JButton diceButtons [];
 	JButton newGame, roll, zero, quit;
@@ -28,7 +29,7 @@ public class Yahtzee
 	public static final int SIDES = 6;
 	
 	Die dice [] = new Die[5];					// always five dice
-	ScoreCard scoreCard = new ScoreCard();
+	ScoreCard scoreCard [] = new ScoreCard[6];
 	public int rollNum = 0, round = 1, tempScore = 0;
 	public boolean scored = false, zeroing = false;
 	
@@ -41,6 +42,8 @@ public class Yahtzee
 	{
 		for (int i = 0; i < 5; i++)
 			dice[i] = new Die(SIDES);
+		for (int i = 0; i < 6; i++)
+			scoreCard[i] = new ScoreCard();
 		setup();
 		forceReRoll();
 	}
@@ -119,13 +122,21 @@ public class Yahtzee
 		buttonPanel = new MyPanel(550, 40);
 		buttonPanel.setLayout(new GridLayout(2,4));
 		
-		for (int i = 0; i < 4; i++)
-			buttonPanel.add(new JPanel());
+		currRoll = new JLabel("  Current Roll: " + rollNum);
+		currRoll.setFont(new Font("Times-Roman", Font.PLAIN, 16));
+		buttonPanel.add(currRoll);
+		buttonPanel.add(new JLabel());
+		buttonPanel.add(new JLabel());
+		
+		highScore = new JLabel("High Score: 315");	
+		currRoll.setFont(new Font("Times-Roman", Font.PLAIN, 16));
+			
+		buttonPanel.add(highScore);
 		
 		newGame = new JButton("New Game");
 		newGame.addActionListener(theListener);
 		buttonPanel.add(newGame);
-		roll = new JButton("Roll");
+		roll = new JButton("Roll");		
 		roll.addActionListener(theListener);
 		buttonPanel.add(roll);
 		zero = new JButton("Zero");
@@ -240,19 +251,19 @@ public class Yahtzee
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			buttons[i].setEnabled(scoreCard.num(i+1, dice));
+			buttons[i].setEnabled(scoreCard[round-1].num(i+1, dice));
 		}
-		buttons[6].setEnabled(scoreCard.numOfAKind(3, dice));
-		buttons[7].setEnabled(scoreCard.numOfAKind(4, dice));
-		buttons[8].setEnabled(scoreCard.fullHouse(dice));
-		buttons[9].setEnabled(scoreCard.numStraight(4, dice));
-		buttons[10].setEnabled(scoreCard.numStraight(5, dice));
-		buttons[11].setEnabled(scoreCard.numOfAKind(5, dice));
-		buttons[12].setEnabled(scoreCard.chance());
-		buttons[13].setEnabled(scoreCard.yahtzeeBonus(dice));
+		buttons[6].setEnabled(scoreCard[round-1].numOfAKind(3, dice));
+		buttons[7].setEnabled(scoreCard[round-1].numOfAKind(4, dice));
+		buttons[8].setEnabled(scoreCard[round-1].fullHouse(dice));
+		buttons[9].setEnabled(scoreCard[round-1].numStraight(4, dice));
+		buttons[10].setEnabled(scoreCard[round-1].numStraight(5, dice));
+		buttons[11].setEnabled(scoreCard[round-1].numOfAKind(5, dice));
+		buttons[12].setEnabled(scoreCard[round-1].chance());
+		buttons[13].setEnabled(scoreCard[round-1].yahtzeeBonus(dice));
 		
 		for (int i = 0; i < 13; i++)
-			if (scoreCard.getScore(i) > -1)
+			if (scoreCard[round-1].getScore(i) > -1)
 				buttons[i].setEnabled(false);
 		
 		zero.setEnabled(true);
@@ -266,14 +277,18 @@ public class Yahtzee
 		if (rollNum < 3 || (rollNum == 3 && scored))
 		{
 			for (int i = 0; i < 5; i++)
-				if (!dice[i].held())
+				if (!dice[i].held() || diceButtons[i].getText() == "?")
 				{
+					if (dice[i].held())
+						toggleDie(i);
 					dice[i].roll();
 					diceButtons[i].setText(Integer.toString(dice[i].value()));
 				}
 				
 			rollNum = (rollNum + 1) % 4;
 		}			
+		
+		currRoll.setText("  Current Roll: " + rollNum);
 
 		enableButtons();
 	}
@@ -281,11 +296,16 @@ public class Yahtzee
 	public void zero()
 	{
 		for (int i = 0; i < 13; i++)
-			if (scoreCard.getScore(i) == -1)
+			if (scoreCard[round-1].getScore(i) == -1)
 					buttons[i].setEnabled(true);
 		roll.setEnabled(false);
 	}
 		
+	public void questionMarks()
+	{
+		for (int i = 0; i < 5; i++)
+			diceButtons[i].setText("?");
+	}
 	public void toggleDie(int n)
 	{
 		if (!dice[n].held())
@@ -297,14 +317,14 @@ public class Yahtzee
 
 	public void score(int n, int score)
 	{
-		scoreCard.setScore(n, score);		// backend - not GUI
+		scoreCard[round-1].setScore(n, score);		// backend - not GUI
 		if (n > 5)
 			n += 4;
 		for (int i = 0; i < 5; i++)
 			if (dice[i].held())
 				toggleDie(i);
 		zeroing = false;
-		if (n != 13)
+		if (n != 17)
 			scored = true;
 		tempScore = 0;
 		
@@ -313,20 +333,21 @@ public class Yahtzee
 		
 		// and recalculate the totals and display those
 		boxes[7][round].setText("  " +
-		 						Integer.toString(scoreCard.upperScore()));
+				Integer.toString(scoreCard[round-1].upperScore()));
 		boxes[8][round].setText("  " +	
-								Integer.toString(scoreCard.bonusScore()));
+				Integer.toString(scoreCard[round-1].bonusScore()));
 		boxes[9][round].setText("  " +
-						Integer.toString(scoreCard.totalUpperScore()));
+				Integer.toString(scoreCard[round-1].totalUpperScore()));
 		boxes[19][round].setText("  " +	
-						Integer.toString(scoreCard.lowerScore()));
+				Integer.toString(scoreCard[round-1].lowerScore()));
 		boxes[20][round].setText("  " +	
-						Integer.toString(scoreCard.totalUpperScore()));
+				Integer.toString(scoreCard[round-1].totalUpperScore()));
 		boxes[21][round].setText("  " +	
-						Integer.toString(scoreCard.grandTotal()));	
-		if (n != 13)				
+				Integer.toString(scoreCard[round-1].grandTotal()));	
+		if (n != 17)				
 			forceReRoll();
-		scored = false;
+		scored = false;	
+		questionMarks();	
 	}
 	
 	public void forceReRoll()
@@ -336,8 +357,9 @@ public class Yahtzee
 		zero.setEnabled(false);
 		roll.setEnabled(true);
 		rollNum = 0;
+		currRoll.setText("  Current Roll: " + rollNum);
 		scored = false;
-		if (scoreCard.filled())
+		if (scoreCard[round-1].filled())
 			forceNewGame();
 	}
 	
@@ -383,7 +405,7 @@ public class Yahtzee
 						if (round < 6)
 						{
 							round++;
-							setupDicePanel();
+							questionMarks();
 							forceReRoll();
 						}
 						else
