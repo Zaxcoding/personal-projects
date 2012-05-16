@@ -1,0 +1,26 @@
+Ideas for additions to Yahtzee:
+
+0.
+High score (saving and loading)
+
+1.
+Sound for YAHTZEE.
+Explosion of color and excitement for YAHTZEE.
+
+2.
+A 'rolling' animation for the dice.
+Graphics for the dice.
+Sound for the rolling.
+
+3.
+Saving and loading (objects, so harder to cheat)
+
+4.
+Multiplayer (local).
+
+5.
+Taunts (for multiplayer), perhaps through ConfirmDialogs.
+Hitler.
+
+6.
+Mulitplayer (network)

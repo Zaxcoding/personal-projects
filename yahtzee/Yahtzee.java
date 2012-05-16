@@ -123,14 +123,11 @@ public class Yahtzee
 		buttonPanel.setLayout(new GridLayout(2,4));
 		
 		currRoll = new JLabel("  Current Roll: " + rollNum);
-		currRoll.setFont(new Font("Times-Roman", Font.PLAIN, 16));
 		buttonPanel.add(currRoll);
 		buttonPanel.add(new JLabel());
 		buttonPanel.add(new JLabel());
 		
 		highScore = new JLabel("High Score: 315");	
-		currRoll.setFont(new Font("Times-Roman", Font.PLAIN, 16));
-			
 		buttonPanel.add(highScore);
 		
 		newGame = new JButton("New Game");
