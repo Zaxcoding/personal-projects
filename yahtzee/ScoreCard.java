@@ -32,7 +32,7 @@ public class ScoreCard
 	public int upperScore()
 	{
 		int upperScore = 0;
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 			if (scores[i] != -1)
 				upperScore += scores[i];
 		return upperScore;
@@ -67,6 +67,15 @@ public class ScoreCard
 	public boolean bonus()
 	{
 		return upperScore() >= 63;
+	}
+
+	public boolean filled()
+	{
+		boolean ans = true;
+		for (int i = 0; i < 13; i++)
+			if (scores[i] == -1)
+				ans = false;
+		return ans;
 	}
 
 	/* use this to test for aces-sixes
@@ -181,7 +190,7 @@ public class ScoreCard
 
 	public boolean chance()
 	{
-		return scores[12] != -1;
+		return scores[12] == -1;
 	}
 
 	// true iff there's been a yahtzee, and they have a yahtzee
