@@ -32,7 +32,7 @@ public class Yahtzee
 	ScoreCard scoreCard [] = new ScoreCard[6];
 	public int rollNum = 0, round = 1, tempScore = 0;
 	public boolean scored = false, zeroing = false;
-	
+
 	public static void main(String [] args)
 	{
 		new Yahtzee();
@@ -88,7 +88,7 @@ public class Yahtzee
 //		thePane.add(infoPanel);
 		theWindow.pack();
 		theWindow.setVisible(true);
-		
+				
 	}
 	
 	public void setupDicePanel()
@@ -433,7 +433,7 @@ public class Yahtzee
 	private class MyListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
-		{
+		{	
 			if (zeroing)
 			{
 				for (int i = 0; i < 13; i++)					
@@ -447,7 +447,7 @@ public class Yahtzee
 					}
 			}
 			else
-			{
+			{	
 				for (int i = 0; i < 5; i++)
 					if (e.getSource() == diceButtons[i])
 						toggleDie(i);

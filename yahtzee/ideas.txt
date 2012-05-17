@@ -3,8 +3,10 @@ Ideas for additions to Yahtzee:
 0.
 High score (saving and loading)
 
+/* Done! 5/16
 0.5
 Keyboard controls (asdfg for dice, r for roll, z for zero, ...)
+*/
 
 1.
 Sound for YAHTZEE.
