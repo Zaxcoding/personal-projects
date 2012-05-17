@@ -123,6 +123,7 @@ public class Yahtzee
 		buttonPanel.setLayout(new GridLayout(2,4));
 		
 		currRoll = new JLabel("  Current Roll: " + rollNum);
+		currRoll.setFont(new Font("Helvetica", Font.PLAIN, 16));
 		buttonPanel.add(currRoll);
 		buttonPanel.add(new JLabel());
 		buttonPanel.add(new JLabel());
@@ -285,6 +286,9 @@ public class Yahtzee
 			rollNum = (rollNum + 1) % 4;
 		}			
 		
+		if (rollNum == 3)
+			roll.setEnabled(false);
+		
 		currRoll.setText("  Current Roll: " + rollNum);
 
 		enableButtons();
@@ -296,6 +300,7 @@ public class Yahtzee
 			if (scoreCard[round-1].getScore(i) == -1)
 					buttons[i].setEnabled(true);
 		roll.setEnabled(false);
+		zero.setEnabled(false);
 	}
 		
 	public void questionMarks()
@@ -380,13 +385,15 @@ public class Yahtzee
 		{
 			if (zeroing)
 			{
-				for (int i = 0; i < 14; i++)					
+				for (int i = 0; i < 13; i++)					
 					if (e.getSource() == buttons[i])
+					{
 						score(i, 0);
-				zeroing = false;
-				scored = true;	
-				roll.setEnabled(true);
-				forceReRoll();
+						zeroing = false;
+						scored = true;	
+						roll.setEnabled(true);
+						forceReRoll();
+					}
 			}
 			else
 			{
