@@ -56,9 +56,13 @@ public class Yahtzee
 		
 		gamePanel = new MyPanel(1000, 540);		
 		gamePanel.setLayout(new GridLayout(1, 2));
+		gamePanel.addKeyListener(new InputHandler());
+		gamePanel.setFocusable(true);
 		
 		leftPanel = new MyPanel(550, 540);
 		leftPanel.setLayout(new GridLayout(3, 1));
+		leftPanel.addKeyListener(new InputHandler());
+		leftPanel.setFocusable(true);
 		
 		JLabel yahtzee = new JLabel("        YAHTZEE");
 		yahtzee.setFont(new Font("Helvetica", Font.ITALIC, 72));
@@ -76,6 +80,8 @@ public class Yahtzee
 		gamePanel.add(leftPanel);
 
 		setupScorePanel();
+		scorePanel.addKeyListener(new InputHandler());
+		scorePanel.setFocusable(true);
 		gamePanel.add(scorePanel);
 		
 		thePane.add(gamePanel);
@@ -131,13 +137,13 @@ public class Yahtzee
 		highScore = new JLabel("High Score: 315");	
 		buttonPanel.add(highScore);
 		
-		newGame = new JButton("New Game");
+		newGame = new JButton("New Game [N]");
 		newGame.addActionListener(theListener);
 		buttonPanel.add(newGame);
-		roll = new JButton("Roll");		
+		roll = new JButton("Roll [R]");		
 		roll.addActionListener(theListener);
 		buttonPanel.add(roll);
-		zero = new JButton("Zero");
+		zero = new JButton("Zero [Z]");
 		zero.addActionListener(theListener);
 		buttonPanel.add(zero);
 		quit = new JButton("Quit");
@@ -292,6 +298,7 @@ public class Yahtzee
 		currRoll.setText("  Current Roll: " + rollNum);
 
 		enableButtons();
+		gamePanel.grabFocus();
 	}
 	
 	public void zero()
@@ -308,6 +315,7 @@ public class Yahtzee
 		for (int i = 0; i < 5; i++)
 			diceButtons[i].setText("?");
 	}
+
 	public void toggleDie(int n)
 	{
 		if (!dice[n].held())
@@ -350,6 +358,7 @@ public class Yahtzee
 			forceReRoll();
 		scored = false;	
 		questionMarks();	
+		gamePanel.grabFocus();
 	}
 	
 	public void forceReRoll()
@@ -379,7 +388,49 @@ public class Yahtzee
 					+ dice[3].value() + dice[4].value());
 	}
 
-	class MyListener implements ActionListener
+	private class InputHandler extends KeyAdapter
+	{
+	    public void keyPressed(KeyEvent e) 
+		{
+	        if (e.getKeyCode() == KeyEvent.VK_R && roll.isEnabled()) 
+		        roll();
+		    if (e.getKeyCode() == KeyEvent.VK_A && diceButtons[0].isEnabled()) 
+		        toggleDie(0);                  
+		    if (e.getKeyCode() == KeyEvent.VK_S && diceButtons[1].isEnabled()) 
+		        toggleDie(1);                  
+		    if (e.getKeyCode() == KeyEvent.VK_D && diceButtons[2].isEnabled()) 
+		        toggleDie(2);                 
+		    if (e.getKeyCode() == KeyEvent.VK_F && diceButtons[3].isEnabled()) 
+		        toggleDie(3);                  
+		    if (e.getKeyCode() == KeyEvent.VK_G && diceButtons[4].isEnabled()) 
+		        toggleDie(4);
+			if (e.getKeyCode() == KeyEvent.VK_Z && zero.isEnabled())
+			{
+				zero();
+				zeroing = true;
+			}
+			if (e.getKeyCode() == KeyEvent.VK_N && newGame.isEnabled())
+			{
+				if (JOptionPane.showConfirmDialog(null, "Are you sure you"
+				 	 + " want to start a new game?",	"New Game", 
+						JOptionPane.YES_NO_OPTION) == 0)
+				{	
+					if (round < 6)
+					{
+						round++;
+						questionMarks();
+						forceReRoll();
+						gamePanel.grabFocus();
+					}
+					else
+						new Yahtzee();
+				}
+			}
+			
+	    }
+	}
+
+	private class MyListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
 		{
@@ -411,6 +462,7 @@ public class Yahtzee
 							round++;
 							questionMarks();
 							forceReRoll();
+							gamePanel.grabFocus();
 						}
 						else
 							new Yahtzee();
