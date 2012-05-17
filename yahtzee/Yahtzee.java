@@ -6,6 +6,7 @@
 import java.util.*;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.*;		// except for this
 import java.awt.*;
 import java.awt.event.*;
@@ -31,7 +32,8 @@ public class Yahtzee
 	Die dice [] = new Die[5];					// always five dice
 	ScoreCard scoreCard [] = new ScoreCard[6];
 	public int rollNum = 0, round = 1, tempScore = 0;
-	public boolean scored = false, zeroing = false;
+	public boolean scored = false, zeroing = false, rolling = false;
+	Timer timer;
 
 	public static void main(String [] args)
 	{
@@ -46,6 +48,9 @@ public class Yahtzee
 			scoreCard[i] = new ScoreCard();
 		setup();
 		forceReRoll();
+		timer = new Timer(60, theListener);
+		timer.start();
+		timer.stop();
 	}
 	
 	public void setup()
@@ -275,10 +280,10 @@ public class Yahtzee
 	
 	public void roll()
 	{
-		if (rollNum == 3 && !scored)
-			JOptionPane.showMessageDialog(null, "Select a score first!");
+		timer.restart();
+		rolling = true;
 		
-		if (rollNum < 3 || (rollNum == 3 && scored))
+		if (rollNum < 3)
 		{
 			for (int i = 0; i < 5; i++)
 				if (!dice[i].held() || diceButtons[i].getText() == "?")
@@ -294,11 +299,11 @@ public class Yahtzee
 		
 		if (rollNum == 3)
 			roll.setEnabled(false);
-		
-		currRoll.setText("  Current Roll: " + rollNum);
 
-		enableButtons();
 		gamePanel.grabFocus();
+
+		currRoll.setText("  Current Roll: " + rollNum);
+		
 	}
 	
 	public void zero()
@@ -392,6 +397,15 @@ public class Yahtzee
 	{
 	    public void keyPressed(KeyEvent e) 
 		{
+			if (rolling)
+			{
+				timer.stop();
+				rolling = false;
+				enableButtons();
+				gamePanel.grabFocus();
+			}
+			else
+			{
 	        if (e.getKeyCode() == KeyEvent.VK_R && roll.isEnabled()) 
 		        roll();
 		    if (e.getKeyCode() == KeyEvent.VK_A && diceButtons[0].isEnabled()) 
@@ -426,6 +440,7 @@ public class Yahtzee
 						new Yahtzee();
 				}
 			}
+			}
 			
 	    }
 	}
@@ -434,6 +449,29 @@ public class Yahtzee
 	{
 		public void actionPerformed(ActionEvent e)
 		{	
+			if (rolling)
+			{
+				if (e.getSource() == timer)
+				{
+					for (int i = 0; i < 5; i++)
+					if (!dice[i].held() || diceButtons[i].getText() == "?")
+						{
+							if (dice[i].held())
+								toggleDie(i);
+							dice[i].roll();
+					diceButtons[i].setText(Integer.toString(dice[i].value()));
+						}
+				}
+				
+				if (e.getSource()  != timer)
+				{
+					timer.stop();
+					rolling = false;
+					enableButtons();
+					gamePanel.grabFocus();
+				}
+			}
+			else
 			if (zeroing)
 			{
 				for (int i = 0; i < 13; i++)					
@@ -446,7 +484,7 @@ public class Yahtzee
 						forceReRoll();
 					}
 			}
-			else
+			else if (!rolling)
 			{	
 				for (int i = 0; i < 5; i++)
 					if (e.getSource() == diceButtons[i])
