@@ -30,9 +30,9 @@ public class Yahtzee
 	public static final int SIDES = 6;
 	
 	Die dice [] = new Die[5];					// always five dice
-	ScoreCard scoreCard [] = new ScoreCard[6];
-	public int rollNum = 0, round = 1, tempScore = 0;
-	public boolean scored = false, zeroing = false, rolling = false;
+	ScoreCard scoreCard [] = new ScoreCard[6];  // because six games
+	int rollNum = 0, round = 1, tempScore = 0;
+	boolean scored = false, zeroing = false, rolling = false;
 	Timer timer;
 
 	public static void main(String [] args)
@@ -48,9 +48,6 @@ public class Yahtzee
 			scoreCard[i] = new ScoreCard();
 		setup();
 		forceReRoll();
-		timer = new Timer(60, theListener);
-		timer.start();
-		timer.stop();
 	}
 	
 	public void setup()
@@ -59,16 +56,11 @@ public class Yahtzee
 		thePane = theWindow.getContentPane();					
 		thePane.setLayout(new GridLayout(1, 2));
 		
-		gamePanel = new MyPanel(1000, 540);		
-		gamePanel.setLayout(new GridLayout(1, 2));
+		gamePanel = new MyPanel(1000, 540, 1, 2);		
 		gamePanel.addKeyListener(new InputHandler());
-		gamePanel.setFocusable(true);
+		gamePanel.setFocusable(true);	// needed for keyboard input
 		
-		leftPanel = new MyPanel(550, 540);
-		leftPanel.setLayout(new GridLayout(3, 1));
-		leftPanel.addKeyListener(new InputHandler());
-		leftPanel.setFocusable(true);
-		
+		leftPanel = new MyPanel(550, 540, 3, 1);		
 		JLabel yahtzee = new JLabel("        YAHTZEE");
 		yahtzee.setFont(new Font("Helvetica", Font.ITALIC, 72));
 		yahtzee.setForeground(Color.RED);
@@ -80,64 +72,49 @@ public class Yahtzee
 		leftPanel.add(dicePanel);
 		
 		setupButtonPanel();
-		leftPanel.add(buttonPanel);
-		
+		leftPanel.add(buttonPanel);		
 		gamePanel.add(leftPanel);
 
 		setupScorePanel();
-		scorePanel.addKeyListener(new InputHandler());
-		scorePanel.setFocusable(true);
 		gamePanel.add(scorePanel);
 		
 		thePane.add(gamePanel);
-//		thePane.add(infoPanel);
 		theWindow.pack();
 		theWindow.setVisible(true);
-				
+		
+		// for the rolling animation
+		timer = new Timer(60, theListener);
+		timer.start();
+		timer.stop();			
 	}
 	
 	public void setupDicePanel()
 	{
-		dicePanel = new MyPanel(400, 180);
-		dicePanel.setLayout(new GridLayout(1,7));
-		
+		dicePanel = new MyPanel(400, 180, 1, 7);
 		diceButtons = new JButton[5];
 	
-		dicePanel.add(new JPanel());
-			
-		diceButtons[0] = new JButton("?");
-		diceButtons[0].setFont(new Font("Helvetica", Font.PLAIN, 50));
-		dicePanel.add(diceButtons[0]);
-		diceButtons[1] = new JButton("?");
-		diceButtons[1].setFont(new Font("Helvetica", Font.PLAIN, 50));
-		dicePanel.add(diceButtons[1]);
-		diceButtons[2] = new JButton("?");
-		diceButtons[2].setFont(new Font("Helvetica", Font.PLAIN, 50));
-		dicePanel.add(diceButtons[2]);
-		diceButtons[3] = new JButton("?");
-		diceButtons[3].setFont(new Font("Helvetica", Font.PLAIN, 50));
-		dicePanel.add(diceButtons[3]);
-		diceButtons[4] = new JButton("?");
-		diceButtons[4].setFont(new Font("Helvetica", Font.PLAIN, 50));
-		dicePanel.add(diceButtons[4]);
-		
+		dicePanel.add(new JPanel());	// blank - for formatting
 		for (int i = 0; i < 5; i++)
+		{
+			diceButtons[i] = new JButton();
+			diceButtons[i].setFont(new Font("Helvetica", Font.PLAIN, 50));
 			diceButtons[i].addActionListener(theListener);
+			dicePanel.add(diceButtons[i]);
+		}
+		dicePanel.add(new JPanel());	// blank - for formatting
 		
-		dicePanel.add(new JPanel());
-		
+		questionMarks();	// add the question marks
 	}		
 
 	public void setupButtonPanel()
 	{
-		buttonPanel = new MyPanel(550, 40);
-		buttonPanel.setLayout(new GridLayout(2,4));
+		buttonPanel = new MyPanel(550, 40, 2, 4);
 		
 		currRoll = new JLabel("  Current Roll: " + rollNum);
 		currRoll.setFont(new Font("Helvetica", Font.PLAIN, 16));
 		buttonPanel.add(currRoll);
-		buttonPanel.add(new JLabel());
-		buttonPanel.add(new JLabel());
+		buttonPanel.add(new JLabel());	// PUT INSTRUCTIONS HERE
+		buttonPanel.add(new JLabel());	// AND HERE
 		
 		highScore = new JLabel("High Score: 315");	
 		buttonPanel.add(highScore);
@@ -153,13 +130,14 @@ public class Yahtzee
 		buttonPanel.add(zero);
 		quit = new JButton("Quit");
 		quit.addActionListener(theListener);
-		
 		buttonPanel.add(quit);
 		
 	}
 	
 	public void setupScorePanel()
 	{
+		// this code is pretty ugly but it's needed to get the nice
+		// looking score card
 		
 		scorePanel = new MyPanel(400,540);
 		grid = new MyPanel[7];
@@ -167,19 +145,17 @@ public class Yahtzee
 		JLabel l0;
 		buttons = new JButton[14];
 		
-		grid[0] = new MyPanel(120, 540);
-		grid[1] = new MyPanel(60, 540);
+		grid[0] = new MyPanel(120, 540, 22, 1);
 		for (int i = 1; i < 7; i++)
 		{
-			grid[i] = new MyPanel(40, 540);
-			grid[i].setLayout(new GridLayout(22, 1));
+			grid[i] = new MyPanel(40, 540, 22, 1);
 			l0 = new JLabel("  #" + i);
 			l0.setBorder(new MatteBorder(2, 2, 2, 2, Color.BLACK));
 			boxes[0][i] = l0;
 			for (int j = 1; j < 10; j++)
 			{
 				boxes[j][i] = new JLabel();
-				boxes[j][i].setBorder(new MatteBorder(0, 1, 1, 1, Color.BLACK));
+			boxes[j][i].setBorder(new MatteBorder(0, 1, 1, 1, Color.BLACK));
 			}
 			boxes[10][i] = new JLabel();
 			boxes[10][i].setBorder(new MatteBorder(0, 0, 1, 0, Color.BLACK));
@@ -188,14 +164,12 @@ public class Yahtzee
 			{
 				boxes[j][i] = new JLabel();
 				boxes[j][i].setBorder(
-									new MatteBorder(0, 1, 1, 1, Color.BLACK));
+								new MatteBorder(0, 1, 1, 1, Color.BLACK));
 			}
 			for (int j = 0; j < 22; j++)
 				grid[i].add(boxes[j][i]);
 		}
-			
-		grid[0].setLayout(new GridLayout(22, 1));
-        
+			        
 		JLabel l1 = new JLabel("  Upper Section");
 		l1.setFont(new Font("Helvetica", Font.BOLD, 14));
 		l1.setBorder(new MatteBorder(2, 2, 2, 2, Color.BLACK));
@@ -280,34 +254,35 @@ public class Yahtzee
 	
 	public void roll()
 	{
-		timer.restart();
-		rolling = true;
+		timer.restart();	// animation
+		rolling = true;		// animation
 		
 		if (rollNum < 3)
 		{
-			for (int i = 0; i < 5; i++)
-				if (!dice[i].held() || diceButtons[i].getText() == "?")
-				{
-					if (dice[i].held())
-						toggleDie(i);
-					dice[i].roll();
-					diceButtons[i].setText(Integer.toString(dice[i].value()));
-				}
-				
+			rollingAnimation();
 			rollNum = (rollNum + 1) % 4;
 		}			
-		
 		if (rollNum == 3)
 			roll.setEnabled(false);
 
-		gamePanel.grabFocus();
-
 		currRoll.setText("  Current Roll: " + rollNum);
-		
+	}
+	
+	public void rollingAnimation()
+	{
+		for (int i = 0; i < 5; i++)
+			if (!dice[i].held() || diceButtons[i].getText() == "?")
+			{
+				if (dice[i].held())
+					toggleDie(i);
+				dice[i].roll();
+				diceButtons[i].setText(Integer.toString(dice[i].value()));
+			}
 	}
 	
 	public void zero()
 	{
+		zeroing = true;
 		for (int i = 0; i < 13; i++)
 			if (scoreCard[round-1].getScore(i) == -1)
 					buttons[i].setEnabled(true);
@@ -363,7 +338,6 @@ public class Yahtzee
 			forceReRoll();
 		scored = false;	
 		questionMarks();	
-		gamePanel.grabFocus();
 	}
 	
 	public void forceReRoll()
@@ -402,10 +376,8 @@ public class Yahtzee
 				timer.stop();
 				rolling = false;
 				enableButtons();
-				gamePanel.grabFocus();
 			}
-			else
-			{
+			else {
 	        if (e.getKeyCode() == KeyEvent.VK_R && roll.isEnabled()) 
 		        roll();
 		    if (e.getKeyCode() == KeyEvent.VK_A && diceButtons[0].isEnabled()) 
@@ -419,10 +391,7 @@ public class Yahtzee
 		    if (e.getKeyCode() == KeyEvent.VK_G && diceButtons[4].isEnabled()) 
 		        toggleDie(4);
 			if (e.getKeyCode() == KeyEvent.VK_Z && zero.isEnabled())
-			{
 				zero();
-				zeroing = true;
-			}
 			if (e.getKeyCode() == KeyEvent.VK_N && newGame.isEnabled())
 			{
 				if (JOptionPane.showConfirmDialog(null, "Are you sure you"
@@ -434,7 +403,6 @@ public class Yahtzee
 						round++;
 						questionMarks();
 						forceReRoll();
-						gamePanel.grabFocus();
 					}
 					else
 						new Yahtzee();
@@ -449,26 +417,16 @@ public class Yahtzee
 	{
 		public void actionPerformed(ActionEvent e)
 		{	
+			gamePanel.grabFocus();
 			if (rolling)
 			{
 				if (e.getSource() == timer)
-				{
-					for (int i = 0; i < 5; i++)
-					if (!dice[i].held() || diceButtons[i].getText() == "?")
-						{
-							if (dice[i].held())
-								toggleDie(i);
-							dice[i].roll();
-					diceButtons[i].setText(Integer.toString(dice[i].value()));
-						}
-				}
-				
+					rollingAnimation();
 				if (e.getSource()  != timer)
 				{
 					timer.stop();
 					rolling = false;
 					enableButtons();
-					gamePanel.grabFocus();
 				}
 			}
 			else
@@ -500,7 +458,6 @@ public class Yahtzee
 							round++;
 							questionMarks();
 							forceReRoll();
-							gamePanel.grabFocus();
 						}
 						else
 							new Yahtzee();
@@ -510,10 +467,7 @@ public class Yahtzee
 				if (e.getSource() == roll)
 					roll();
 				if (e.getSource() == zero)
-				{
 					zero();
-					zeroing = true;
-				}	
 				if (e.getSource() == quit)
 					System.exit(0);
 				for (int i = 0; i < 6; i++)

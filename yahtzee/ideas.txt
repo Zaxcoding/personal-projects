@@ -13,7 +13,7 @@ Sound for YAHTZEE.
 Explosion of color and excitement for YAHTZEE.
 
 2.
-A 'rolling' animation for the dice.
+A 'rolling' animation for the dice. // Done! 5/17
 Graphics for the dice.
 Sound for the rolling.
 
