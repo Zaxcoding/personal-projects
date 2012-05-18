@@ -5,10 +5,12 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import com.apple.eawt.*;
 import java.util.*;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
 import javax.swing.Timer;
 
 public class Yahtzee
@@ -35,6 +37,16 @@ public class Yahtzee
 	boolean scored = false, zeroing = false, rolling = false;
 	Timer timer;
 	Clip yahtzeeClip, rollingClip;
+	
+	// preferences menu stuff
+	Application app;
+	AppListener appListener;
+	int delay = 60;
+	JButton save, close;
+	JFrame preferences;
+	JSlider slider;
+	JLabel currVal;
+	SliderChangeListener sliderListener;
 
 	public static void main(String [] args)
 	{
@@ -56,6 +68,7 @@ public class Yahtzee
 		theWindow = new JFrame("YAHTZEE - by Zaxcoding");	
 		thePane = theWindow.getContentPane();					
 		thePane.setLayout(new GridLayout(1, 2));
+		theWindow.setLocation(150, 150); 
 		
 		gamePanel = new MyPanel(1000, 540, 1, 2);		
 		gamePanel.addKeyListener(new InputHandler());
@@ -84,11 +97,15 @@ public class Yahtzee
 		theWindow.setVisible(true);
 		
 		// for the rolling animation
-		timer = new Timer(60, theListener);
+		timer = new Timer(delay, theListener);
 		timer.start();
 		timer.stop();			
 		
 		setupSound();
+		
+		app = Application.getApplication();
+		appListener = new AppListener();
+		app.setPreferencesHandler(appListener);
 	}
 	
 	public void setupDicePanel()
@@ -438,6 +455,60 @@ public class Yahtzee
 	    }
 	}
 
+	private class AppListener implements PreferencesHandler
+	{
+		public void handlePreferences(AppEvent.PreferencesEvent e)
+		{
+			preferences = new JFrame("Preferences");
+			preferences.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			preferences.setLocation(350, 200);
+			MyPanel prefPanel = new MyPanel(500, 200, 4, 1);
+			
+			prefPanel.add(new JLabel("<html><p>  Adjust the speed of the rolling animation to increase or lower the difficulty.<br>  500 is very easy, 250 is easy, 60 is normal.</p></html>", SwingConstants.CENTER));			
+			currVal = new JLabel("  Current value: " + delay);
+			prefPanel.add(currVal);
+			
+			slider = new JSlider();
+	        slider.setPaintTicks(true);
+	        slider.setPaintLabels(true);
+	        slider.setMaximum(500);
+	        slider.setMinimum(0);
+	        slider.setMajorTickSpacing(100);
+	        slider.setMinorTickSpacing(25);
+	        slider.setValue(delay);
+	
+			MyPanel temp = new MyPanel (500, 50, 1, 2);
+			save = new JButton("Save changes");
+			close = new JButton("Close");
+			close.addActionListener(theListener);
+			temp.add(save);
+			temp.add(close);
+			
+			sliderListener = new SliderChangeListener();
+			
+	        slider.addChangeListener(sliderListener);
+			prefPanel.add(slider);
+			prefPanel.add(temp);
+			
+			preferences.add(prefPanel);
+	        preferences.pack();
+	        preferences.setVisible(true);
+		}
+	}
+	
+	private class SliderChangeListener implements ChangeListener
+	{
+		public void stateChanged(ChangeEvent e) 
+		{
+            String adjust = "";
+            if (slider.getValueIsAdjusting())
+            	currVal.setText("Current value: " + slider.getValue());
+			delay = slider.getValue();
+			timer.setDelay(delay);
+        }
+    };
+	
+
 	private class MyListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
@@ -519,6 +590,9 @@ public class Yahtzee
 					score(12, sum());
 				if (e.getSource() == buttons[13])
 					score(13, 100);
+				if (e.getSource() == close)
+					preferences.setVisible(false);
+			        
 			}
 		}
 	}
