@@ -9,7 +9,7 @@ Keyboard controls (asdfg for dice, r for roll, z for zero, ...)
 */
 
 1.
-Sound for YAHTZEE.
+Sound for YAHTZEE. // Done! 5/17
 Explosion of color and excitement for YAHTZEE.
 
 2.

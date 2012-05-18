@@ -2,14 +2,14 @@
  * Implemented through Java's Swing/AWT GUI system. 
  * Initial kickstart taken from Assig4 (graphical hangman). */
 
-// verbatim from Assig4
-import java.util.*;
-import java.io.*;
-import javax.swing.*;
-import javax.swing.Timer;
-import javax.swing.border.*;		// except for this
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.util.*;
+import javax.sound.sampled.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.Timer;
 
 public class Yahtzee
 {
@@ -34,6 +34,7 @@ public class Yahtzee
 	int rollNum = 0, round = 1, tempScore = 0;
 	boolean scored = false, zeroing = false, rolling = false;
 	Timer timer;
+	Clip yahtzeeClip, rollingClip;
 
 	public static void main(String [] args)
 	{
@@ -86,6 +87,8 @@ public class Yahtzee
 		timer = new Timer(60, theListener);
 		timer.start();
 		timer.stop();			
+		
+		setupSound();
 	}
 	
 	public void setupDicePanel()
@@ -230,6 +233,21 @@ public class Yahtzee
 			
 	}
 	
+	public void setupSound()
+	{
+		
+		File yahtzeeFile = new File("sound/yahtzee.wav");
+		
+		try
+ 		{
+			AudioInputStream yahtzeeSound = AudioSystem.getAudioInputStream(yahtzeeFile);
+            yahtzeeClip = AudioSystem.getClip();
+            yahtzeeClip.open(yahtzeeSound);
+	    }
+		catch (Exception e) 
+		{      System.out.println(e);      }		
+	}
+	
 	public void enableButtons()
 	{
 		for (int i = 0; i < 6; i++)
@@ -248,6 +266,13 @@ public class Yahtzee
 		for (int i = 0; i < 13; i++)
 			if (scoreCard[round-1].getScore(i) > -1)
 				buttons[i].setEnabled(false);
+		
+		if (scoreCard[round-1].numOfAKind(5, dice))
+		{
+			yahtzeeClip.stop();
+			yahtzeeClip.setFramePosition(0);
+			yahtzeeClip.start();
+		}
 		
 		zero.setEnabled(true);
 	}

@@ -24,5 +24,4 @@ class MyPanel extends JPanel
 	{
 		return new Dimension(width, height);
 	}
-
 }
