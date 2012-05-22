@@ -25,7 +25,6 @@ Multiplayer (local).
 
 5.
 Taunts (for multiplayer), perhaps through ConfirmDialogs.
-Hitler.
 
 6.
 Mulitplayer (network)
