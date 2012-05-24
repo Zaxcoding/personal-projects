@@ -1,24 +1,29 @@
 Ideas for additions to Yahtzee:
 
+/* Done! 5/24
 0.
 High score (saving and loading)
+*/
 
 /* Done! 5/16
 0.5
 Keyboard controls (asdfg for dice, r for roll, z for zero, ...)
 */
 
+/* Done! 5/17
 1.
-Sound for YAHTZEE. // Done! 5/17
-Explosion of color and excitement for YAHTZEE.
+Sound for YAHTZEE.
+*/
 
 2.
 A 'rolling' animation for the dice. // Done! 5/17
 Graphics for the dice.
 Sound for the rolling.
 
+/* 5/24 - Did this for high score, that's it.
 3.
 Saving and loading (objects, so harder to cheat)
+*/
 
 4.
 Multiplayer (local).

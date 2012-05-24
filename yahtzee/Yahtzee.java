@@ -5,13 +5,15 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import com.apple.eawt.*;
 import java.util.*;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.Timer;
+
+import com.apple.eawt.*;
+
 
 public class Yahtzee
 {
@@ -41,7 +43,7 @@ public class Yahtzee
 	// preferences menu stuff
 	Application app;
 	AppListener appListener;
-	int delay = 60;
+	int delay = 60, hiScore;
 	JButton save, close;
 	JFrame preferences;
 	JSlider slider;
@@ -136,7 +138,31 @@ public class Yahtzee
 		buttonPanel.add(new JLabel());	// PUT INSTRUCTIONS HERE
 		buttonPanel.add(new JLabel());	// AND HERE
 		
-		highScore = new JLabel("High Score: 315");	
+		try
+		{
+			ObjectInputStream IS = new ObjectInputStream(
+								new FileInputStream("highscore.ytz"));
+			hiScore = IS.readInt();
+			IS.close();
+		}
+		catch (Exception e)
+		{
+			try{
+			System.out.println("Creating highscore.ytz file");
+			ObjectOutputStream OS = new ObjectOutputStream(
+					new FileOutputStream("highscore.ytz"));
+			OS.writeInt(150);
+			hiScore = 150;
+			OS.close();
+			}
+			catch (Exception f)
+			{
+				System.out.println(f + "\nException writing");
+			}
+		}
+		
+		
+		highScore = new JLabel("High Score: " + hiScore);	
 		buttonPanel.add(highScore);
 		
 		newGame = new JButton("New Game [N]");
@@ -401,6 +427,25 @@ public class Yahtzee
 			buttons[i].setEnabled(false);
 		zero.setEnabled(false);
 		roll.setEnabled(false);
+		if (scoreCard[round-1].grandTotal() > hiScore)
+		{
+			hiScore = scoreCard[round-1].grandTotal();
+			JOptionPane.showMessageDialog(null, 
+			"Congratulations- you set a new high score: " + hiScore + "!",
+			"New High Score!!", JOptionPane.INFORMATION_MESSAGE);
+			try{
+			ObjectOutputStream OS = new ObjectOutputStream(
+					new FileOutputStream("highscore.ytz"));
+			OS.writeInt(hiScore);
+			OS.close();
+			}
+			catch (Exception f)
+			{
+				System.out.println(f + "\nException writing");
+			}	
+			highScore.setText("High Score: " + hiScore);
+		}
+			
 	}
 	
 	public int sum()
@@ -508,7 +553,6 @@ public class Yahtzee
         }
     };
 	
-
 	private class MyListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
