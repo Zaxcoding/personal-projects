@@ -18,7 +18,7 @@ public class LevelEditor
 	public static final int SCROLL_SPEED = 10;		// the camera scroll speed
 	public static final int THICKNESS = 2;			// the thickness you adjust by
 		
-	private List<Box> shapes = new ArrayList<Box>(20);
+	private List<Shape> shapes = new ArrayList<Shape>(20);
 	
 	public LevelEditor() 
 	{	
@@ -105,7 +105,7 @@ public class LevelEditor
 			temp.draw();
 			
 			// draw the placed boxes
-			for (Box box : shapes)
+			for (Shape box : shapes)
 				box.draw();
 
 			// Dispose of the translations on the matrix.
@@ -120,18 +120,15 @@ public class LevelEditor
 		System.exit(0);
 	}
 	
-	public void save(List<Box> shapes, String filename)
+	public void save(List<Shape> shapes, String filename)
 	{
 		try
 		{
 			ObjectOutputStream OS = new ObjectOutputStream(new FileOutputStream(filename));
 			OS.writeInt(shapes.size());
-			for (Box box : shapes)
+			for (Shape box : shapes)
 			{
-				OS.writeDouble(box.getX());
-				OS.writeDouble(box.getY());
-				OS.writeDouble(box.getWidth());
-				OS.writeDouble(box.getHeight());
+				box.save(OS);
 			}
 			OS.close();
 			System.out.println("Saved!");
@@ -146,7 +143,7 @@ public class LevelEditor
 		}
 	}
 	
-	public void load(List<Box> shapes, String filename)
+	public void load(List<Shape> shapes, String filename)
 	{
 		try
 		{
