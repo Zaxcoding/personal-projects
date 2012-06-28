@@ -47,7 +47,7 @@ public class Gametry2
 	public static final double ACCEL = .0022;			// for gravity
 	public static final double INIT_VELOCITY = -.83;	// for jumping
 
-	private float translate_x = 0, translate_y = 0;
+	private float translate_x = 50, translate_y = 0;
 	private int width = 25, height = 25;
 	
 	private List<Shape> shapes = new ArrayList<Shape>(20);
@@ -74,6 +74,7 @@ public class Gametry2
 		// Enter the main render loop
 		velocity = -.1;
 		currTime = getTime();
+		
 		while (!Display.isCloseRequested())
 		{
 					
@@ -107,9 +108,26 @@ public class Gametry2
 		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && onGround())  
 			jump(player);
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)) 
+		{
+			translate_x += 5;
 			player.x -= 5;
+		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) 
+		{
+			translate_x -= 5;
 			player.x += 5;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_R))
+		{
+			player.x = startX;
+			player.y = startY + player.height;
+			jumping = false;
+			translate_x = 0;
+			translate_y = 0;
+			velocity = 0;
+			gravity = 0;
+		}
+		
 	}
 	
 	public void gravity()
@@ -138,13 +156,14 @@ public class Gametry2
 			gravity = ACCEL;
 			hangTime = getTime() - currTime;
 		}
+		if (hangTime >= 360)
+			jumping = false;
 		
-		jumping = false;
+	//	System.out.println(jumping + "" + hangTime);
 		
 		player.setDY(velocity + gravity*hangTime);
 		player.update(getDelta());
 				
-		System.out.println(player.y);
 	}
 	
 	public boolean onGround()
@@ -159,14 +178,13 @@ public class Gametry2
 		{
 			if ((shape.x <= left && (shape.x + shape.width >= right)) &&
 					((-20 <= bottom - shape.y - shape.height) && (bottom - shape.y - shape.height <= 5))
-					&& shape.user == false)
+					&& !shape.user && !jumping)
 			{
 				player.y = shape.y - player.height;
-				System.out.println("BREAK!!!!");
-				System.out.println("HIT! - " + left + "  " + right + "  " + bottom);
-				System.out.println("\t" + shape.x + "  " + (shape.x + shape.width) + "  " + (shape.y + shape.height));
+			//	System.out.println("BREAK!!!!");
+			//	System.out.println("HIT! - " + left + "  " + right + "  " + bottom);
+			//	System.out.println("\t" + shape.x + "  " + (shape.x + shape.width) + "  " + (shape.y + shape.height));
 			//	currTime = 0;
-				hangTime = 0;
 				return true;
 			}
 				
@@ -176,8 +194,11 @@ public class Gametry2
 	
 	public void jump(Shape player)
 	{
-		velocity = INIT_VELOCITY;
+		if (jumping && velocity < INIT_VELOCITY)
+			velocity += INIT_VELOCITY/10;
+		//velocity = INIT_VELOCITY;
 		currTime = getTime();
+	//	player.y -= player.height;
 		//hangTime = 0;
 		jumping = true;
 	}

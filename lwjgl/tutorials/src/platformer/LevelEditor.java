@@ -78,7 +78,7 @@ public class LevelEditor
 		if (Mouse.isButtonDown(1))
 		{
 			startX = mousex;
-			startY = mousey - 10;
+			startY = mousey;
 		}
 	}
 	
@@ -92,8 +92,7 @@ public class LevelEditor
 		            
 		uniFont.drawString(-translate_x, -translate_y, "Mouse: " + Mouse.getX() + ","+(HEIGHT-Mouse.getY()-1));
 		uniFont.drawString(-translate_x, -translate_y + FONT_SIZE + 5, "Absolute: " + -translate_x + "," + translate_y);
-		if (startX > 0 && startY > 0)
-			uniFont.drawString(startX, startY, ">");
+		uniFont.drawString(startX, startY, ">");
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		//EDIT.. glDisable texture is required here.
 		        
@@ -203,6 +202,8 @@ public class LevelEditor
 				Box temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
 				shapes.add(temp);
 			}
+			translate_x = 0;
+			translate_y = 0;
 			
 			System.out.println("Loaded!");
 		} catch (FileNotFoundException e)
