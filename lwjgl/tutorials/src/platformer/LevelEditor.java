@@ -28,6 +28,8 @@ public class LevelEditor
 		
 	float translate_x = 0, translate_y = 0;
 	float mousex, mousey;
+	float startX, startY;
+	
 	int width = 75;
 	int height = 10;
 	
@@ -72,7 +74,12 @@ public class LevelEditor
 		mousey = HEIGHT - Mouse.getY() - 1 - translate_y;
 					
 		if (Mouse.isButtonDown(0))
-			shapes.add(new Box(mousex, mousey, width, height));						
+			shapes.add(new Box(mousex, mousey, width, height));			
+		if (Mouse.isButtonDown(1))
+		{
+			startX = mousex;
+			startY = mousey - 10;
+		}
 	}
 	
 	public void render()
@@ -85,6 +92,8 @@ public class LevelEditor
 		            
 		uniFont.drawString(-translate_x, -translate_y, "Mouse: " + Mouse.getX() + ","+(HEIGHT-Mouse.getY()-1));
 		uniFont.drawString(-translate_x, -translate_y + FONT_SIZE + 5, "Absolute: " + -translate_x + "," + translate_y);
+		if (startX > 0 && startY > 0)
+			uniFont.drawString(startX, startY, ">");
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		//EDIT.. glDisable texture is required here.
 		        
@@ -166,6 +175,9 @@ public class LevelEditor
 			{
 				box.save(OS);
 			}
+			OS.writeFloat(startX);
+			OS.writeFloat(startY);
+			
 			OS.close();
 			System.out.println("Saved!");
 		} catch (FileNotFoundException e)
@@ -191,7 +203,7 @@ public class LevelEditor
 				Box temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
 				shapes.add(temp);
 			}
-			IS.close();
+			
 			System.out.println("Loaded!");
 		} catch (FileNotFoundException e)
 		{

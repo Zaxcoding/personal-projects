@@ -42,11 +42,12 @@ public class LevelEditor
 	int height = 10;
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	private UnicodeFont uniFont;
+	
 	public LevelEditor() 
 	{	
 		
 		
-		initGL(640,480);
+		initGL(WIDTH,HEIGHT);
 		initFonts();
 		
 		// Set-up an orthographic presentation where (0, 0) is the upper-left corner and (1024, 600) is the bottom right one.
@@ -135,9 +136,8 @@ public class LevelEditor
         try {
             uniFont.loadGlyphs();
         } catch (SlickException e) {};
-
-
     }
+	
 	private void render()
     {
 

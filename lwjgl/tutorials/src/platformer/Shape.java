@@ -4,7 +4,7 @@ import java.io.*;
 
 public abstract class Shape
 {
-	protected boolean visible, touched;
+	protected boolean visible, touched, user;
 	protected double dx, dy, x, y, width, height;
 
 	public Shape(double x, double y, double width, double height) 
