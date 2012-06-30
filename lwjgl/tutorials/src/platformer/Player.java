@@ -1,29 +1,41 @@
 package platformer;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glColor3d;
+import static org.lwjgl.opengl.GL11.glRectd;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-public class Box extends Shape
+public class Player extends Shape
 {
-	public Box(double x, double y, double width, double height)
+
+	public Player(double x, double y, double width, double height)
 	{
 		super(x, y, width, height);
-		code = 1;
+		user = true;
+		code = 3;
+	}
+
+	@Override
+	public void interact()
+	{
 	}
 
 	@Override
 	public void draw()
 	{
-		glColor3d(1, 1, 1);
+		glColor3d(.3,.5,.4);
 		glRectd(x, y, x + width, y + height);
 	}
-	
+
+	@Override
 	public void save(ObjectOutputStream OS)
 	{
 		try
 		{
-			OS.writeInt(code);			// 1 is the code for Box
+			OS.writeInt(code);
 			OS.writeDouble(x);
 			OS.writeDouble(y);
 			OS.writeDouble(width);
@@ -39,21 +51,15 @@ public class Box extends Shape
 		}
 	}
 
-	public void interact()
-	{
-		// bounce off the sides/bottom, stay on the top
-	}
-
-	public boolean intersects(Shape other)
-	{
-		// not filling this in yet
-		return false;
-	}
-
 	@Override
 	public void load(ObjectInputStream OS)
 	{
-		// don't have time for this either
 	}
-	
+
+	@Override
+	public boolean intersects(Shape other)
+	{
+		return false;
+	}
+
 }

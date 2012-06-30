@@ -1,0 +1,14 @@
+Ideas for the LevelEditor and Game.
+
+LevelEditor:
+//	Ability to type filenames to screen- not console. - delaying this for now, really had difficulty with it.
+Add a settings/dev menu (accessible by ` key) to turn off/on different displays on the screen.
+Initial menu with new, load, controls.
+Change the start > to it's own number key (3?), take it away from right click.
+Adjust to make easier to add new Shapes.
+Add moving of already-placed Shapes. (right click to select, then left click to place)
+	- Like sampling with eyedropper tool
+	- Also, when you select it surrounds with a few pixel thick light colored boundary.
+Saving only prompts for filename if you save as (with shift), or have no filename already.
+
+Made disappearingBox actually work!

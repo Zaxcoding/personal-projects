@@ -1263,10 +1263,9 @@ class Bat extends AbstractMoveableEntity{
 	
 	public void draw(){
 		glColor3d(1.0,1,1);
-			glRectd(x,y, x+width, y+height);
-		
+		glRectd(x,y, x+width, y+height);
+
 	}
-	
 	
 }
 class Dead extends AbstractMoveableEntity{

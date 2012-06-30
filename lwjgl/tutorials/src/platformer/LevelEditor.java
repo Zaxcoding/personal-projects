@@ -17,6 +17,9 @@ import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.font.effects.ColorEffect;
 
+import platformer.Box;
+import platformer.DisappearingBox;
+import platformer.Shape;
 
 public class LevelEditor 
 {
@@ -32,6 +35,8 @@ public class LevelEditor
 	
 	int width = 75;
 	int height = 10;
+	
+	private String currShape = "Box";
 	
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	
@@ -74,7 +79,12 @@ public class LevelEditor
 		mousey = HEIGHT - Mouse.getY() - 1 - translate_y;
 					
 		if (Mouse.isButtonDown(0))
-			shapes.add(new Box(mousex, mousey, width, height));			
+		{
+			if (currShape == "Box")
+				shapes.add(new Box(mousex, mousey, width, height));			
+			else if (currShape == "Disappearing Box")
+				shapes.add(new DisappearingBox(mousex, mousey, width, height));
+		}
 		if (Mouse.isButtonDown(1))
 		{
 			startX = mousex;
@@ -85,22 +95,30 @@ public class LevelEditor
 	public void render()
 	{
 		// just so you can see your current box
-		Box temp = new Box(mousex, mousey, width, height);
+		Shape temp = new Box(0,0,0,0);
+		
+		if (currShape == "Box")
+			temp = new Box(mousex, mousey, width, height);
+		else if (currShape == "Disappearing Box")
+			temp = new DisappearingBox(mousex, mousey, width, height);
+		
 		temp.draw();
 					
 		glEnable(GL_BLEND);
 		            
 		uniFont.drawString(-translate_x, -translate_y, "Mouse: " + Mouse.getX() + ","+(HEIGHT-Mouse.getY()-1));
 		uniFont.drawString(-translate_x, -translate_y + FONT_SIZE + 5, "Absolute: " + -translate_x + "," + translate_y);
-		uniFont.drawString(startX, startY, ">");
+		if (startX != 0 && startY != 0)
+			uniFont.drawString(startX, startY, ">");
+		uniFont.drawString(-translate_x, HEIGHT - translate_y - FONT_SIZE - 5, "Shape: " + currShape);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		//EDIT.. glDisable texture is required here.
 		        
 		glDisable(GL_BLEND); 
 					
 		// draw the placed boxes
-		for (Shape box : shapes)
-			box.draw();
+		for (Shape shape : shapes)
+			shape.draw();
 	}
 	
 	public void input()
@@ -136,6 +154,11 @@ public class LevelEditor
 		if (Keyboard.isKeyDown(Keyboard.KEY_D)) 
 			translate_x -= SCROLL_SPEED;
 		
+		if (Keyboard.isKeyDown(Keyboard.KEY_1))
+			currShape = "Box";
+		if (Keyboard.isKeyDown(Keyboard.KEY_2))
+			currShape = "Disappearing Box";
+		
 		// IJKL to adjust height/width
 		if (Keyboard.isKeyDown(Keyboard.KEY_I) && (height - THICKNESS) >= 1) 
 			height -= THICKNESS;
@@ -170,9 +193,9 @@ public class LevelEditor
 		{
 			ObjectOutputStream OS = new ObjectOutputStream(new FileOutputStream(filename));
 			OS.writeInt(shapes.size());
-			for (Shape box : shapes)
+			for (Shape shape : shapes)
 			{
-				box.save(OS);
+				shape.save(OS);
 			}
 			OS.writeFloat(startX);
 			OS.writeFloat(startY);
@@ -199,9 +222,16 @@ public class LevelEditor
 			int size = IS.readInt();
 			for (int i = 0; i < size; i++)
 			{
-				Box temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+				Shape temp = new Box(0,0,0,0);
+				int code = IS.readInt();
+				if (code == 1)
+					temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+				else if (code == 2)
+					temp = new DisappearingBox(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
 				shapes.add(temp);
 			}
+			startX = IS.readFloat();
+			startY = IS.readFloat();
 			translate_x = 0;
 			translate_y = 0;
 			
