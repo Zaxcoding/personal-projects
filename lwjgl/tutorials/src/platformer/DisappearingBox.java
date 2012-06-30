@@ -55,15 +55,30 @@ public class DisappearingBox extends Shape
 		}
 	}
 	
-	@Override
-	public void load(ObjectInputStream OS)
+	public Shape load(ObjectInputStream IS)
 	{
+		DisappearingBox temp = new DisappearingBox(0,0,0,0);
+		try
+		{
+			temp = new DisappearingBox(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return temp;	
 	}
 
 	@Override
 	public boolean intersects(Shape other)
 	{
 		return false;
+	}
+
+	@Override
+	public void doYourThing()
+	{
 	}
 
 }

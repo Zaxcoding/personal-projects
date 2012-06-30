@@ -19,6 +19,7 @@ import org.newdawn.slick.font.effects.ColorEffect;
 
 import platformer.Box;
 import platformer.DisappearingBox;
+import platformer.MovingPlatform;
 import platformer.Shape;
 
 public class LevelEditor 
@@ -37,6 +38,8 @@ public class LevelEditor
 	int height = 10;
 	
 	private String currShape = "Box";
+	
+	private Shape selected;
 	
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	
@@ -84,11 +87,33 @@ public class LevelEditor
 				shapes.add(new Box(mousex, mousey, width, height));			
 			else if (currShape == "Disappearing Box")
 				shapes.add(new DisappearingBox(mousex, mousey, width, height));
+			else if (currShape == "Start Position")
+			{
+				startY = mousey;
+				startX = mousex;
+			}
+			else if (currShape == "Moving Platform")
+			{
+				MovingPlatform temp = new MovingPlatform(mousex, mousey, width, height);
+				System.out.println("Move up/down (1) or left/right (0): ");
+				Scanner inScan = new Scanner(System.in);
+				int tempUpDown = inScan.nextInt();
+				boolean upDown;
+				if (tempUpDown == 1)
+					upDown = true;
+				else
+					upDown = false;
+				System.out.println("End position (either bottom or right): ");
+				int end = inScan.nextInt();
+				System.out.println("Speed (low integer values): ");
+				int speed = inScan.nextInt();
+				temp.setMovement(upDown, (int)mousex, end, 1, speed);
+				shapes.add(temp);
+			}
 		}
 		if (Mouse.isButtonDown(1))
 		{
-			startX = mousex;
-			startY = mousey;
+			
 		}
 	}
 	
@@ -101,6 +126,8 @@ public class LevelEditor
 			temp = new Box(mousex, mousey, width, height);
 		else if (currShape == "Disappearing Box")
 			temp = new DisappearingBox(mousex, mousey, width, height);
+		else if (currShape == "Moving Platform")
+			temp = new MovingPlatform(mousex, mousey, width, height);
 		
 		temp.draw();
 					
@@ -158,6 +185,11 @@ public class LevelEditor
 			currShape = "Box";
 		if (Keyboard.isKeyDown(Keyboard.KEY_2))
 			currShape = "Disappearing Box";
+		if (Keyboard.isKeyDown(Keyboard.KEY_3))
+			currShape = "Start Position";
+		if (Keyboard.isKeyDown(Keyboard.KEY_4))
+			currShape = "Moving Platform";
+		
 		
 		// IJKL to adjust height/width
 		if (Keyboard.isKeyDown(Keyboard.KEY_I) && (height - THICKNESS) >= 1) 
@@ -222,12 +254,8 @@ public class LevelEditor
 			int size = IS.readInt();
 			for (int i = 0; i < size; i++)
 			{
-				Shape temp = new Box(0,0,0,0);
 				int code = IS.readInt();
-				if (code == 1)
-					temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
-				else if (code == 2)
-					temp = new DisappearingBox(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+				Shape temp = Shape.load(IS, code);
 				shapes.add(temp);
 			}
 			startX = IS.readFloat();

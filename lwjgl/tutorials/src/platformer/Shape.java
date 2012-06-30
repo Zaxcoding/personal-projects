@@ -19,10 +19,32 @@ public abstract class Shape
 	}
 	
 	public abstract void interact();
+	public abstract void doYourThing();
 	public abstract void draw();
 	public abstract void save(ObjectOutputStream OS);
-	public abstract void load(ObjectInputStream OS);
+	public abstract Shape load(ObjectInputStream IS);
 	public abstract boolean intersects(Shape other);
+	
+	public static Shape load(ObjectInputStream IS, int shapeCode)
+	{
+		Shape temp = new Box(0,0,0,0);		
+		if (shapeCode == 1)
+		{
+			temp = new Box(0,0,0,0);
+			temp = temp.load(IS);
+		}
+		else if (shapeCode == 2)
+		{
+			temp = new DisappearingBox(0,0,0,0);
+			temp = temp.load(IS);
+		}
+		else if (shapeCode == 4)
+		{
+			temp = new MovingPlatform(0,0,0,0);
+			temp = temp.load(IS);
+		}
+		return temp;
+	}
 	
 	public boolean isVisible()
 	{

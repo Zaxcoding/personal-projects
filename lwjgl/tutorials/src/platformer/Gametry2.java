@@ -46,6 +46,9 @@ public class Gametry2
 		initGL();
 		
 		currTime = getTime();
+	//	MovingPlatform test = new MovingPlatform(150, 150, 50, 10);
+	//	test.setMovement(false, 150, 300, 1, 5);
+	//	shapes.add(test);
 		
 		while (!Display.isCloseRequested())
 		{
@@ -59,6 +62,7 @@ public class Gametry2
 			input();
 			gravity();
 			update();
+			everybodyDoYourThing();
 			render();
 
 			glPopMatrix();
@@ -70,6 +74,12 @@ public class Gametry2
 		Display.destroy();
 		System.exit(0);
 	}	
+	
+	public void everybodyDoYourThing()
+	{
+		for (Shape shape: shapes)
+			shape.doYourThing();
+	}
 	
 	public void input()
 	{
@@ -249,14 +259,10 @@ public class Gametry2
 			ObjectInputStream IS = new ObjectInputStream(new FileInputStream(filename));
 			int size = IS.readInt();
 			
-			Shape temp = new Box(0,0,0,0);
 			for (int i = 0; i < size; i++)
 			{
 				int code = IS.readInt();
-				if (code == 1)
-					temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
-				if (code == 2)
-					temp = new DisappearingBox(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+				Shape temp = Shape.load(IS, code);
 				shapes.add(temp);
 			}
 			// the last two floats in the file are the start position

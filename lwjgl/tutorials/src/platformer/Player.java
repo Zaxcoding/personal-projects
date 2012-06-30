@@ -52,14 +52,20 @@ public class Player extends Shape
 	}
 
 	@Override
-	public void load(ObjectInputStream OS)
+	public Shape load(ObjectInputStream OS)
 	{
+		return new Player(0,0,0,0);
 	}
 
 	@Override
 	public boolean intersects(Shape other)
 	{
 		return false;
+	}
+
+	@Override
+	public void doYourThing()
+	{
 	}
 
 }

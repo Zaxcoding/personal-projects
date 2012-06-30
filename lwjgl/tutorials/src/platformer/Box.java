@@ -51,9 +51,23 @@ public class Box extends Shape
 	}
 
 	@Override
-	public void load(ObjectInputStream OS)
+	public Shape load(ObjectInputStream IS)
 	{
-		// don't have time for this either
+		Shape temp = new Box(0,0,0,0);
+		try
+		{
+			temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return temp;
+	}
+
+	@Override
+	public void doYourThing()
+	{
 	}
 	
 }
