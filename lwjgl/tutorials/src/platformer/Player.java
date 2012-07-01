@@ -13,7 +13,8 @@ public class Player extends Shape
 
 	boolean alive;
 	public double startX, startY;
-	public int lives = 5;
+	public int lives = 100;
+	public Checkpoint activeCheckpoint;
 	
 	public Player(double x, double y, double width, double height)
 	{
@@ -26,6 +27,11 @@ public class Player extends Shape
 		startY = y;
 	}
 
+	public void setActiveCheckpoint(Checkpoint x)
+	{
+		activeCheckpoint = x;
+	}
+	
 	@Override
 	public void interact(Player player)
 	{
@@ -74,6 +80,11 @@ public class Player extends Shape
 	public void die()
 	{
 		lives--;
+		if (activeCheckpoint != null)
+		{
+			startX = activeCheckpoint.x + activeCheckpoint.width/2;
+			startY = activeCheckpoint.y;
+		}
 		if (lives > 0)
 		{
 			x = startX;

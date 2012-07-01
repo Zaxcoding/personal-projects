@@ -1,41 +1,20 @@
 package platformer;
 
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glOrtho;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.Font;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
+
+import javax.swing.JOptionPane;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.input.*;
+import org.lwjgl.opengl.*;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
-
-import platformer.Box;
-import platformer.Shape;
 
 public class Game
 {	
@@ -44,150 +23,205 @@ public class Game
 	public static final int SCROLL_SPEED = 10;		// the camera scroll speed
 	public static final int THICKNESS = 2;			// the thickness you adjust by
 	public static final int FONT_SIZE = 25;			// font size of the x,y coords.
+	public static final int MOVEMENT_AMOUNT = 5;	// for moving left, right, and translating
 	public static final double ACCEL = .0022;			// for gravity
 	public static final double INIT_VELOCITY = -.83;	// for jumping
-
-	private float translate_x = 0, translate_y = 0;
-	private int width = 25, height = 25;
+	public static final double TERMINAL_VELOCITY = 200;	// for falling
+	
+	private double hangTime = 0, currTime = 0, gravity = 0, velocity = -.1;
+	private float translateX = 50, translateY = 0;
+	private float startX, startY;
+	private int width = 25, height = 25, gravityMod = 1;	// gravityMod = 1 for normal, -1 for reverse
+	private long lastFrame;
+	
+	private boolean jumping = false;
 	
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	private UnicodeFont uniFont;
 	
-	private Shape player = new Box(100, 250, width, height);
+	private Player player;
 	
-	private double hangTime = 0, currTime = 0;;
+	boolean grounded;
 	
-	private long lastFrame;
-	
-	private double gravity = 0; 
-	
-	private boolean firstJump = true;
-		
 	public Game()
-	{
-		player.user = true;
-		
+	{		
 		loadLevel();
 	//	initFonts();
 		initGL();
 		
-		// Enter the main render loop
-				while (!Display.isCloseRequested())
-				{
+		currTime = getTime();
+	
+		while (!Display.isCloseRequested())
+		{
 					
-					glClear(GL_COLOR_BUFFER_BIT);
-					glPushMatrix();
+			glClear(GL_COLOR_BUFFER_BIT);
+			glPushMatrix();
 					
-					glTranslatef(translate_x, 0, 0);
-					glTranslatef(0, translate_y, 0);
+			glTranslatef(translateX, 0, 0);
+			glTranslatef(0, translateY, 0);
 
-					input();
-				//	gravity();
-				//	onGround();
-					render();
+			input();
+			grounded = onGround();
+			gravity();
+			
+			update();
+			everybodyDoYourThing();
+			render();
+			
+			glPopMatrix();
 
-					glPopMatrix();
+			Display.update();
+			Display.sync(60);
+		}
 
-					// Make sure the display stays responsive and wait until we reach 60fps.
-					Display.update();
-					Display.sync(60);
-				}
-
-				Display.destroy();
-				System.exit(0);
+		Display.destroy();
+		System.exit(0);
+	}	
+	
+	public void everybodyDoYourThing()
+	{
+		for (Shape shape: shapes)
+			shape.doYourThing();
 	}
-		
-		
 	
 	public void input()
 	{
-	
-		// WASD to move the camera
-		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && (onGround() || firstJump))  
+		// W or up arrow to jump
+		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && grounded)  
 			jump(player);
+		// move the player and the camera left
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)) 
-			player.x -= 5;
+			moveLeft(player);
+		// move the player and the camera right
 		if (Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) 
-			player.x += 5;
+			moveRight(player);
+		// reset the player's position, the camera, and the gravity
+		if (Keyboard.isKeyDown(Keyboard.KEY_R))
+			restart();
 	}
 	
 	public void gravity()
-	{
-		if (onGround())
-			gravity = 0;
-		else
-			gravity = ACCEL;
+	{		
+		// sometimes things get crazy and this keeps it in check
+		if (player.y < -7E7 || player.y > 7E7)
+			player.y = startY;	
 		
-		player.dy += gravity;
-		player.update(getDelta());
-		
-		System.out.println(player.y);
-	}
-	
-	public boolean onGround()
-	{
-		double left = player.x + player.width/2;
-		double right = player.x - player.width/2;
-		double bottom = player.y + player.height;
-		
-		boolean ans = false;
-		
-		for (Shape shape : shapes)
-		{
-			if ((shape.x <= left && (shape.x + shape.width >= right)) &&
-					((-20 <= bottom - shape.y - shape.height) && (bottom - shape.y - shape.height <= 5))
-					&& shape.user == false)
-			{
-				player.y = shape.y - player.height;
-				System.out.println("BREAK!!!!");
-				System.out.println("HIT! - " + left + "  " + right + "  " + bottom);
-				System.out.println("\t" + shape.x + "  " + (shape.x + shape.width) + "  " + (shape.y + shape.height));
-				firstJump = false;
-				currTime = 0;
-				return true;
-			}
-				
-		}
-		System.out.println( "" + left + "  " + right + "  " + bottom);
-
-		return ans;
-	}
-	
-	public void jump(Shape player)
-	{
-		player.setDY(INIT_VELOCITY);
-		
-		if (currTime == 0)
-		{
+		if (!jumping && grounded)
 			currTime = getTime();
+		
+		if (grounded)
+		{
+			velocity = 0;
+			gravity = 0;
 			hangTime = 0;
 			getDelta();
 		}
 		else
 		{
+			gravity = ACCEL;
 			hangTime = getTime() - currTime;
-			player.setDY(INIT_VELOCITY + ACCEL*hangTime);
-			player.update(getDelta());
-			System.out.println("ZZZZZ" + player.dy);
 		}
+		if (jumping)
+		{
+			velocity = INIT_VELOCITY;
+			gravity = ACCEL;
+			hangTime = getTime() - currTime;
+		}
+		if (hangTime >= 360)
+			jumping = false;
 		
+		if (velocity > TERMINAL_VELOCITY)
+			velocity = TERMINAL_VELOCITY;
+				
+		player.setDY(velocity + gravity*hangTime*gravityMod);
+		player.update(getDelta());
+		translateY = (float) (HEIGHT/2 - player.y);
+		translateX = (float) (WIDTH/2 - player.x);
+	}
+	
+	public boolean onGround()
+	{
+		double left = player.x + player.width/2;
+		double right = player.x;
+		double bottom = player.y + player.height;
+						
+		for (Shape shape : shapes)
+		{
+			// by default, make the value you look for the shape's height
+			double delta = shape.height;
+			// this helps with landing from great heights onto thin strips
+			
+			if (20 >= shape.height)
+				delta = 20;
+			if ((shape.x <= left && (shape.x + shape.width >= right)) &&
+					((-delta <= bottom - shape.y - shape.height) && (bottom - shape.y - shape.height <= 5))
+					&& !shape.user && !jumping)
+			{
+				player.y = shape.y - player.height;
+				shape.interact(player);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void restart()
+	{
+		player.x = startX;
+		player.y = startY + player.height;
+		jumping = false;
+		translateX = 0;
+		translateY = 0;
+		velocity = 0;
+		gravity = 0;
+		hangTime = 0;
+	}
+	
+	public void jump(Shape player)
+	{
+		currTime = getTime();
+		jumping = true;
 	}
 	
 	public void moveLeft(Shape player)
 	{
-		System.out.println("left");
+		translateX += MOVEMENT_AMOUNT;
+		player.x -= MOVEMENT_AMOUNT;
 	}
 	
 	public void moveRight(Shape player)
 	{
-		System.out.println("right");
+		translateX -= MOVEMENT_AMOUNT;
+		player.x += MOVEMENT_AMOUNT;
 	}
 	
 	public void render()
-	{				
+	{					
 		// draw the placed boxes
-		for (Shape box : shapes)
-			box.draw();
+		for (Shape shape : shapes)
+			if (shape.isVisible())
+				shape.draw();
+	}
+	
+	public void update()
+	{
+		// remove the Shapes that say removeMe
+		Shape temp = new Box(0,0,0,0);
+		for (Shape shape : shapes)
+		{
+			if (shape.removeMe)
+				temp = shape;
+			if (shape.name.equals("Checkpoint") && shape != player.activeCheckpoint)
+			{
+				Checkpoint temp2 = (Checkpoint) shape;
+				temp2.active = false;
+			}
+		}
+		if (temp.removeMe)
+			shapes.remove(temp);
+		if (player.y > 5000)
+			player.alive = false;
+		
 	}
 		
 	private long getTime()
@@ -213,7 +247,7 @@ public class Game
 		} catch (LWJGLException e) 
 		{	e.printStackTrace();	}
 
-		// Set-up an orthographic presentation where (0, 0) is the upper-left corner and (1024, 600) is the bottom right one.
+		// Set-up an orthographic presentation where (0, 0) is the upper-left corner and (WIDTH, HEIGHT) is the bottom right one.
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(0, WIDTH, HEIGHT, 0, -1, 1);
@@ -222,9 +256,8 @@ public class Game
 	
 	public void loadLevel()
 	{
-		System.out.println("Which level would you like to play?");
-		Scanner inScan = new Scanner(System.in);
-		String filename = inScan.next();
+		String filename = JOptionPane.showInputDialog("Which level would you like to play?");
+
 		System.out.println("Loading...");
 		
 		load(shapes, filename);	
@@ -235,23 +268,30 @@ public class Game
 	{
 		try
 		{
+			// clear the array
 			shapes.clear();
 			ObjectInputStream IS = new ObjectInputStream(new FileInputStream(filename));
 			int size = IS.readInt();
+			
 			for (int i = 0; i < size; i++)
 			{
-				Box temp = new Box(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+				int code = IS.readInt();
+				Shape temp = Shape.load(IS, code);
 				shapes.add(temp);
 			}
+			// the last two floats in the file are the start position
+			startX = IS.readFloat();
+			startY = IS.readFloat();
+			
+			player = new Player(startX, startY, width, height);
+			
 			IS.close();
 			System.out.println("Loaded!");
 		} catch (FileNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -273,7 +313,5 @@ public class Game
 	{
 		new Game();
 	}
-	
-	
 	
 }

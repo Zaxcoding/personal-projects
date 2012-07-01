@@ -47,6 +47,9 @@ public class LevelEditor
 	
 	UnicodeFont uniFont;
 	
+	private boolean needDest = false;
+	private Teleporter tempTeleporter;
+	
 	public LevelEditor() 
 	{	
 		
@@ -121,6 +124,27 @@ public class LevelEditor
 					shapes.add(temp);
 				}
 			}
+			else if (currShape == "Teleporter" && !needDest)
+			{
+				tempTeleporter = new Teleporter(mousex, mousey, width, height);
+				shapes.add(tempTeleporter);
+				JOptionPane.showMessageDialog(null, "Left click again to place paired teleporter.");
+				needDest = true;
+				System.out.println("Placed");
+			}
+			else if (currShape == "Teleporter" && needDest)
+			{
+				tempTeleporter.setDestination(mousex + width/2, mousey);
+				double tempX = tempTeleporter.x + tempTeleporter.width/2;
+				double tempY = tempTeleporter.y;
+				tempTeleporter = new Teleporter(mousex, mousey, width, height);
+				tempTeleporter.setDestination(tempX, tempY);
+				shapes.add(tempTeleporter);
+				needDest = false;
+				fixMouse();
+			}
+			else if (currShape == "Checkpoint")
+				shapes.add(new Checkpoint(mousex, mousey, width, height));
 		}
 		if (Mouse.isButtonDown(1))
 		{
@@ -130,6 +154,7 @@ public class LevelEditor
 				selected = temp;
 			}
 		}
+		
 	}
 	
 	public Shape getShape()
@@ -161,6 +186,10 @@ public class LevelEditor
 			temp = new DisappearingBox(mousex, mousey, width, height);
 		else if (currShape == "Moving Platform")
 			temp = new MovingPlatform(mousex, mousey, width, height);
+		else if (currShape == "Teleporter")
+			temp = new Teleporter(mousex, mousey, width, height);
+		else if (currShape == "Checkpoint")
+			temp = new Checkpoint(mousex, mousey, width, height);
 		
 		temp.draw();
 					
@@ -221,6 +250,10 @@ public class LevelEditor
 			currShape = "Start Position";
 		if (Keyboard.isKeyDown(Keyboard.KEY_4))
 			currShape = "Moving Platform";
+		if (Keyboard.isKeyDown(Keyboard.KEY_5))
+			currShape = "Teleporter";
+		if (Keyboard.isKeyDown(Keyboard.KEY_6))
+			currShape = "Checkpoint";
 		
 		
 		// IJKL to adjust height/width
@@ -260,6 +293,18 @@ public class LevelEditor
 			shapes.remove(temp);
 		
 		selected = null;
+	}
+	
+	public void fixMouse()
+	{
+		Mouse.destroy();
+		try
+		{
+			Mouse.create();
+		} catch (LWJGLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void fixKeyboard()

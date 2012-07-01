@@ -39,20 +39,17 @@ public abstract class Shape
 	{
 		Shape temp = new Box(0,0,0,0);		
 		if (shapeCode == 1)
-		{
 			temp = new Box(0,0,0,0);
-			temp = temp.load(IS);
-		}
 		else if (shapeCode == 2)
-		{
 			temp = new DisappearingBox(0,0,0,0);
-			temp = temp.load(IS);
-		}
 		else if (shapeCode == 4)
-		{
 			temp = new MovingPlatform(0,0,0,0);
-			temp = temp.load(IS);
-		}
+		else if (shapeCode == 5)
+			temp = new Teleporter(0,0,0,0);
+		else if (shapeCode == 6)
+			temp = new Checkpoint(0,0,0,0);
+
+		temp = temp.load(IS);
 		return temp;
 	}
 	
@@ -67,7 +64,7 @@ public abstract class Shape
 			glLineStipple(1, (short)0xf0f0);  // Repeat count, repeat pattern
 			glEnable(GL_LINE_STIPPLE); // Turn stipple on
 
-			glBegin(GL_LINE_LOOP); // This is like line loop, except doesn't close
+			glBegin(GL_LINE_LOOP); 
 				glVertex2d(x - BORDER, y - BORDER);
 				glVertex2d(x + BORDER + width, y - BORDER);
 				glVertex2d(x + BORDER + width, y + BORDER + height);
