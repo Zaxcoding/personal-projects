@@ -17,10 +17,11 @@ public class DisappearingBox extends Shape
 	{
 		super(x, y, width, height);
 		code = 2;
+		name = "Disappearing Box";
 	}
 
 	@Override
-	public void interact()
+	public void interact(Player player)
 	{
 		counter++;
 		if (counter > DISAPPEAR_SPEED)
@@ -32,6 +33,7 @@ public class DisappearingBox extends Shape
 	{
 		glColor3d(.6, .3, .4);
 		glRectd(x, y, x + width, y + height);
+		drawBorder();
 	}
 
 	@Override

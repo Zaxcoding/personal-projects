@@ -5,11 +5,12 @@ import static org.lwjgl.opengl.GL11.*;
 import java.io.*;
 
 public class Box extends Shape
-{
+{	
 	public Box(double x, double y, double width, double height)
 	{
 		super(x, y, width, height);
 		code = 1;
+		name = "Box";
 	}
 
 	@Override
@@ -17,6 +18,7 @@ public class Box extends Shape
 	{
 		glColor3d(1, 1, 1);
 		glRectd(x, y, x + width, y + height);
+		drawBorder();
 	}
 	
 	public void save(ObjectOutputStream OS)
@@ -39,7 +41,7 @@ public class Box extends Shape
 		}
 	}
 
-	public void interact()
+	public void interact(Player player)
 	{
 		// bounce off the sides/bottom, stay on the top
 	}

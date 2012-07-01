@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.JOptionPane;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.*;
@@ -39,6 +41,8 @@ public class Gametry2
 	
 	private Player player;
 	
+	boolean grounded;
+	
 	public Gametry2()
 	{		
 		loadLevel();
@@ -46,10 +50,7 @@ public class Gametry2
 		initGL();
 		
 		currTime = getTime();
-	//	MovingPlatform test = new MovingPlatform(150, 150, 50, 10);
-	//	test.setMovement(false, 150, 300, 1, 5);
-	//	shapes.add(test);
-		
+	
 		while (!Display.isCloseRequested())
 		{
 					
@@ -60,11 +61,13 @@ public class Gametry2
 			glTranslatef(0, translateY, 0);
 
 			input();
+			grounded = onGround();
 			gravity();
+			
 			update();
 			everybodyDoYourThing();
 			render();
-
+			
 			glPopMatrix();
 
 			Display.update();
@@ -84,7 +87,7 @@ public class Gametry2
 	public void input()
 	{
 		// W or up arrow to jump
-		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && onGround())  
+		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && grounded)  
 			jump(player);
 		// move the player and the camera left
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)) 
@@ -103,10 +106,10 @@ public class Gametry2
 		if (player.y < -7E7 || player.y > 7E7)
 			player.y = startY;	
 		
-		if (!jumping && onGround())
+		if (!jumping && grounded)
 			currTime = getTime();
 		
-		if (onGround())
+		if (grounded)
 		{
 			velocity = 0;
 			gravity = 0;
@@ -133,6 +136,7 @@ public class Gametry2
 		player.setDY(velocity + gravity*hangTime*gravityMod);
 		player.update(getDelta());
 		translateY = (float) (HEIGHT/2 - player.y);
+		translateX = (float) (WIDTH/2 - player.x);
 	}
 	
 	public boolean onGround()
@@ -154,7 +158,7 @@ public class Gametry2
 					&& !shape.user && !jumping)
 			{
 				player.y = shape.y - player.height;
-				shape.interact();
+				shape.interact(player);
 				return true;
 			}
 		}
@@ -170,6 +174,7 @@ public class Gametry2
 		translateY = 0;
 		velocity = 0;
 		gravity = 0;
+		hangTime = 0;
 	}
 	
 	public void jump(Shape player)
@@ -207,6 +212,8 @@ public class Gametry2
 			temp = shape;
 		if (temp.removeMe)
 			shapes.remove(temp);
+		if (player.y > 5000)
+			player.alive = false;
 	}
 		
 	private long getTime()
@@ -241,9 +248,8 @@ public class Gametry2
 	
 	public void loadLevel()
 	{
-		System.out.println("Which level would you like to play?");
-		Scanner inScan = new Scanner(System.in);
-		String filename = inScan.next();
+		String filename = JOptionPane.showInputDialog("Which level would you like to play?");
+
 		System.out.println("Loading...");
 		
 		load(shapes, filename);	

@@ -6,6 +6,8 @@ import java.util.*;
 import java.awt.Font;
 import java.io.*;
 
+import javax.swing.JOptionPane;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -37,7 +39,7 @@ public class LevelEditor
 	int width = 75;
 	int height = 10;
 	
-	private String currShape = "Box";
+	private String currShape = "Box", inputValue = "";
 	
 	private Shape selected;
 	
@@ -95,26 +97,57 @@ public class LevelEditor
 			else if (currShape == "Moving Platform")
 			{
 				MovingPlatform temp = new MovingPlatform(mousex, mousey, width, height);
-				System.out.println("Move up/down (1) or left/right (0): ");
-				Scanner inScan = new Scanner(System.in);
-				int tempUpDown = inScan.nextInt();
-				boolean upDown;
-				if (tempUpDown == 1)
-					upDown = true;
-				else
-					upDown = false;
-				System.out.println("End position (either bottom or right): ");
-				int end = inScan.nextInt();
-				System.out.println("Speed (low integer values): ");
-				int speed = inScan.nextInt();
-				temp.setMovement(upDown, (int)mousex, end, 1, speed);
-				shapes.add(temp);
+				inputValue = JOptionPane.showInputDialog("Move up/down (1) or left/right (0)?"); 
+				if (inputValue != null  && !inputValue.equals(""))
+				{
+					boolean upDown;
+					int start;
+					if (inputValue.equals("1"))
+					{
+						upDown = true;
+						start = (int) mousey;
+					}
+					else
+					{
+						upDown = false;
+						start = (int) mousex;
+					}
+					inputValue = JOptionPane.showInputDialog("Your start position is " + start + ". Enter an end position.");
+					int end = Integer.parseInt(inputValue);
+					inputValue = JOptionPane.showInputDialog("Speed? (typically pick a low integer value like 1-10)");
+					int speed = Integer.parseInt(inputValue);
+				
+					temp.setMovement(upDown, start, end, 1, speed);
+					shapes.add(temp);
+				}
 			}
 		}
 		if (Mouse.isButtonDown(1))
 		{
-			
+			Shape temp = getShape();
+			if (temp != null)
+			{
+				selected = temp;
+			}
 		}
+	}
+	
+	public Shape getShape()
+	{
+		for (Shape shape: shapes)
+		{
+			if (mousex >= shape.x && (mousex <= shape.x + shape.width)
+					&& mousey >= shape.y && (mousey <= shape.y + shape.height))
+			{
+				selected = shape;
+				shape.selected = true;
+			}
+			else
+			{
+				shape.selected = false;
+			}
+		}
+		return selected;
 	}
 	
 	public void render()
@@ -154,22 +187,21 @@ public class LevelEditor
 				|| Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA))
 				&& Keyboard.isKeyDown(Keyboard.KEY_S))
 		{
-			Scanner inScan = new Scanner(System.in);
-			System.out.println("Enter the desired filename please: ");
-			save(shapes, inScan.next());
+			fixKeyboard();
+			save(shapes);
 		}
 		else if ((Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
 				|| Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA))
 				&& Keyboard.isKeyDown(Keyboard.KEY_O))
 		{
-			Scanner inScan = new Scanner(System.in);
-			System.out.println("Enter the filename to load please: ");
-			load(shapes, inScan.next());
+			fixKeyboard();
+			load(shapes);
 			
 			// reset the camera
 			translate_x = 0;
 			translate_y = 0;
 		}
+		else{
 		
 		// WASD to move the camera
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)) 
@@ -196,10 +228,50 @@ public class LevelEditor
 			height -= THICKNESS;
 		if (Keyboard.isKeyDown(Keyboard.KEY_K)) 
 			height += THICKNESS;
-		if (Keyboard.isKeyDown(Keyboard.KEY_L) && (width - THICKNESS) >= 3) 
+		if (Keyboard.isKeyDown(Keyboard.KEY_L)) 
 			width += THICKNESS;
-		if (Keyboard.isKeyDown(Keyboard.KEY_J)) 
+		if (Keyboard.isKeyDown(Keyboard.KEY_J) && (width - THICKNESS) >= 3) 
 			width -= THICKNESS;
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_C) && selected != null)
+		{
+			currShape = selected.name;
+			width = (int) selected.width;
+			height = (int) selected.height;
+		}
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_DELETE) || Keyboard.isKeyDown(Keyboard.KEY_BACK))
+		{
+			delete();
+		}
+		}	// from the else way up
+	}
+	
+	public void delete()
+	{
+		// for some reason you have to do it like this,
+		// you can't just shapes.remove(selected)
+		Shape temp = new Box(0,0,0,0);
+		for (Shape shape : shapes)
+			if (shape.selected)
+				temp = shape;
+		
+		if (temp.selected)
+			shapes.remove(temp);
+		
+		selected = null;
+	}
+	
+	public void fixKeyboard()
+	{
+		Keyboard.destroy();
+		try
+		{
+			Keyboard.create();
+		} catch (LWJGLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void initGL()
@@ -210,20 +282,24 @@ public class LevelEditor
 			Display.setTitle("Level Editor");
 			Display.create();
 		} catch (LWJGLException e) 
-		{	e.printStackTrace();	}
+		{
+			e.printStackTrace();	
+		}
 
-		// Set-up an orthographic presentation where (0, 0) is the upper-left corner and (1024, 600) is the bottom right one.
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(0, WIDTH, HEIGHT, 0, -1, 1);
 		glMatrixMode(GL_MODELVIEW);
 	}
 	
-	public void save(List<Shape> shapes, String filename)
+	public void save(List<Shape> shapes)
 	{
+		inputValue = JOptionPane.showInputDialog("Enter the desired filename please: ");
+		if (inputValue != null && !inputValue.equals(""))
+		{
 		try
 		{
-			ObjectOutputStream OS = new ObjectOutputStream(new FileOutputStream(filename));
+			ObjectOutputStream OS = new ObjectOutputStream(new FileOutputStream(inputValue));
 			OS.writeInt(shapes.size());
 			for (Shape shape : shapes)
 			{
@@ -236,21 +312,23 @@ public class LevelEditor
 			System.out.println("Saved!");
 		} catch (FileNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 	}
 	
-	public void load(List<Shape> shapes, String filename)
+	public void load(List<Shape> shapes)
 	{
+		inputValue = JOptionPane.showInputDialog("Enter the filename to load please: ");
+		if (inputValue != null && !inputValue.equals(""))
+		{
 		try
 		{
 			shapes.clear();
-			ObjectInputStream IS = new ObjectInputStream(new FileInputStream(filename));
+			ObjectInputStream IS = new ObjectInputStream(new FileInputStream(inputValue));
 			int size = IS.readInt();
 			for (int i = 0; i < size; i++)
 			{
@@ -266,12 +344,11 @@ public class LevelEditor
 			System.out.println("Loaded!");
 		} catch (FileNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 	}
 
@@ -286,8 +363,6 @@ public class LevelEditor
         try {
             uniFont.loadGlyphs();
         } catch (SlickException e) {};
-
-
     }
 	
 	public static void main(String[] args) {

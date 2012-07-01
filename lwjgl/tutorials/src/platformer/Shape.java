@@ -1,12 +1,22 @@
 package platformer;
 
+import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glVertex2d;
+import static org.lwjgl.opengl.GL11.*;
+
+
 import java.io.*;
 
 public abstract class Shape
 {
-	protected boolean visible, touched, user, removeMe = false;
+	protected boolean visible, touched, selected, user, removeMe = false;
 	protected double dx, dy, x, y, width, height;
 	protected int code;
+	protected String name;
+	
+	public static int BORDER = 7;
 
 	public Shape(double x, double y, double width, double height) 
 	{
@@ -18,7 +28,7 @@ public abstract class Shape
 		this.visible = true;
 	}
 	
-	public abstract void interact();
+	public abstract void interact(Player player);
 	public abstract void doYourThing();
 	public abstract void draw();
 	public abstract void save(ObjectOutputStream OS);
@@ -44,6 +54,28 @@ public abstract class Shape
 			temp = temp.load(IS);
 		}
 		return temp;
+	}
+	
+	public void drawBorder()
+	{
+		if (selected)
+		{
+			// copied most of the following from http://forums.inside3d.com/viewtopic.php?t=1326
+			glColor3f(1,0,0); // red
+
+			glLineWidth(2);  // Set line width to 2
+			glLineStipple(1, (short)0xf0f0);  // Repeat count, repeat pattern
+			glEnable(GL_LINE_STIPPLE); // Turn stipple on
+
+			glBegin(GL_LINE_LOOP); // This is like line loop, except doesn't close
+				glVertex2d(x - BORDER, y - BORDER);
+				glVertex2d(x + BORDER + width, y - BORDER);
+				glVertex2d(x + BORDER + width, y + BORDER + height);
+				glVertex2d(x - BORDER, y + BORDER + height);
+			glEnd ();
+			glDisable(GL_LINE_LOOP); // Turn it back off
+			glEnd();
+		}
 	}
 	
 	public boolean isVisible()

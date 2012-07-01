@@ -20,6 +20,7 @@ public class MovingPlatform extends Shape
 	{
 		super(x, y, width, height);
 		code = 4;
+		name = "Moving Platform";
 	}
 
 	public void setMovement(boolean upAndDown, int start, int finish, int dir, int speed)
@@ -45,21 +46,30 @@ public class MovingPlatform extends Shape
 	{
 		if (upDown)
 		{
-			y += direction * speed; 
-			if (y >= bottom || y <= top)
+			y += direction * speed; 	
+			if (y <= top || y >= bottom)
+			{
 				direction *= -1;
+				System.out.println("FLIP");
+			}
+			System.out.println("y: " + y + "   top: " + top + "   bottom: " + bottom);
 		}
 		else
 		{
 			x += direction * speed;
 			if (x <= left || x >= right)
 				direction *= -1;
+			System.out.println(y);
 		}
 	}
 	
 	@Override
-	public void interact()
+	public void interact(Player player)
 	{
+		if (upDown)
+			player.y += direction * speed;
+		else
+			player.x += direction * speed;
 	}
 
 	@Override
@@ -67,6 +77,7 @@ public class MovingPlatform extends Shape
 	{
 		glColor3d(1, 0, 0);
 		glRectd(x, y, x + width, y + height);
+		drawBorder();
 	}
 
 	public void save(ObjectOutputStream OS)

@@ -11,15 +11,23 @@ import java.io.ObjectOutputStream;
 public class Player extends Shape
 {
 
+	boolean alive;
+	public double startX, startY;
+	public int lives = 5;
+	
 	public Player(double x, double y, double width, double height)
 	{
 		super(x, y, width, height);
 		user = true;
 		code = 3;
+		name = "Player";
+		alive = true;
+		startX = x;
+		startY = y;
 	}
 
 	@Override
-	public void interact()
+	public void interact(Player player)
 	{
 	}
 
@@ -62,10 +70,25 @@ public class Player extends Shape
 	{
 		return false;
 	}
+	
+	public void die()
+	{
+		lives--;
+		if (lives > 0)
+		{
+			x = startX;
+			y = startY;
+			alive = true;
+		}
+		else
+			System.out.println("Game over");
+	}
 
 	@Override
 	public void doYourThing()
 	{
+		if (!alive)
+			die();
 	}
 
 }
