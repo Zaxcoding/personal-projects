@@ -13,6 +13,7 @@ public class Teleporter extends Shape
 	private int counter;
 	private static final int TELEPORT_DELAY = 75;
 	private double destX, destY;
+	private int id;
 	
 	public Teleporter(double x, double y, double width, double height)
 	{
@@ -21,10 +22,15 @@ public class Teleporter extends Shape
 		name = "Teleporter";
 	}
 
+	public void setID(int x)
+	{
+		id = x;
+	}
+	
 	public void setDestination(double x, double y)
 	{
 		destX = x;
-		destY = y;
+		destY = y - height;
 	}
 	
 	@Override
@@ -48,7 +54,7 @@ public class Teleporter extends Shape
 				counter--;
 		if (touched)
 			touched = false;
-		System.out.println(counter);
+	//	System.out.println(counter);
 	}
 
 	@Override

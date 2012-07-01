@@ -48,7 +48,9 @@ public abstract class Shape
 			temp = new Teleporter(0,0,0,0);
 		else if (shapeCode == 6)
 			temp = new Checkpoint(0,0,0,0);
-
+		else if (shapeCode == 7)
+			temp = new Trampoline(0,0,0,0);
+		
 		temp = temp.load(IS);
 		return temp;
 	}

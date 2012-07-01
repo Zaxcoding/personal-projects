@@ -25,17 +25,15 @@ public class Game
 	public static final int FONT_SIZE = 25;			// font size of the x,y coords.
 	public static final int MOVEMENT_AMOUNT = 5;	// for moving left, right, and translating
 	public static final double ACCEL = .0022;			// for gravity
-	public static final double INIT_VELOCITY = -.83;	// for jumping
 	public static final double TERMINAL_VELOCITY = 200;	// for falling
+	public static final int COLLISION_HELP_VALUE = 50;	// for landing with great speed on small blocks
 	
-	private double hangTime = 0, currTime = 0, gravity = 0, velocity = -.1;
+	private double hangTime = 0, currTime = 0, gravity = 0;
 	private float translateX = 50, translateY = 0;
 	private float startX, startY;
 	private int width = 25, height = 25, gravityMod = 1;	// gravityMod = 1 for normal, -1 for reverse
 	private long lastFrame;
-	
-	private boolean jumping = false;
-	
+		
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	private UnicodeFont uniFont;
 	
@@ -52,8 +50,7 @@ public class Game
 		currTime = getTime();
 	
 		while (!Display.isCloseRequested())
-		{
-					
+		{			
 			glClear(GL_COLOR_BUFFER_BIT);
 			glPushMatrix();
 					
@@ -87,8 +84,11 @@ public class Game
 	public void input()
 	{
 		// W or up arrow to jump
-		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && grounded)  
-			jump(player);
+		if ((Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)) && grounded)
+		{
+			player.jump();
+			currTime = getTime();
+		}
 		// move the player and the camera left
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)) 
 			moveLeft(player);
@@ -106,34 +106,31 @@ public class Game
 		if (player.y < -7E7 || player.y > 7E7)
 			player.y = startY;	
 		
-		if (!jumping && grounded)
+		if (!player.jumping && grounded)
 			currTime = getTime();
 		
 		if (grounded)
 		{
-			velocity = 0;
+			player.velocity = 0;
 			gravity = 0;
 			hangTime = 0;
 			getDelta();
+			if (player.onTramp)
+			{
+				player.jump();
+				player.onTramp = false;
+			}
+			
 		}
 		else
 		{
 			gravity = ACCEL;
 			hangTime = getTime() - currTime;
 		}
-		if (jumping)
-		{
-			velocity = INIT_VELOCITY;
-			gravity = ACCEL;
-			hangTime = getTime() - currTime;
-		}
 		if (hangTime >= 360)
-			jumping = false;
-		
-		if (velocity > TERMINAL_VELOCITY)
-			velocity = TERMINAL_VELOCITY;
+			player.jumping = false;
 				
-		player.setDY(velocity + gravity*hangTime*gravityMod);
+		player.setDY(player.velocity + gravity*hangTime*gravityMod);
 		player.update(getDelta());
 		translateY = (float) (HEIGHT/2 - player.y);
 		translateX = (float) (WIDTH/2 - player.x);
@@ -151,11 +148,11 @@ public class Game
 			double delta = shape.height;
 			// this helps with landing from great heights onto thin strips
 			
-			if (20 >= shape.height)
-				delta = 20;
+			if (COLLISION_HELP_VALUE >= shape.height)
+				delta = COLLISION_HELP_VALUE;
 			if ((shape.x <= left && (shape.x + shape.width >= right)) &&
 					((-delta <= bottom - shape.y - shape.height) && (bottom - shape.y - shape.height <= 5))
-					&& !shape.user && !jumping)
+					&& !shape.user && !player.jumping)
 			{
 				player.y = shape.y - player.height;
 				shape.interact(player);
@@ -169,34 +166,27 @@ public class Game
 	{
 		player.x = startX;
 		player.y = startY + player.height;
-		jumping = false;
+		player.dy = 0;
+		player.jumping = false;
 		translateX = 0;
 		translateY = 0;
-		velocity = 0;
+		player.velocity = 0;
 		gravity = 0;
 		hangTime = 0;
 	}
 	
-	public void jump(Shape player)
-	{
-		currTime = getTime();
-		jumping = true;
-	}
-	
 	public void moveLeft(Shape player)
 	{
-		translateX += MOVEMENT_AMOUNT;
 		player.x -= MOVEMENT_AMOUNT;
 	}
 	
 	public void moveRight(Shape player)
 	{
-		translateX -= MOVEMENT_AMOUNT;
 		player.x += MOVEMENT_AMOUNT;
 	}
 	
 	public void render()
-	{					
+	{			
 		// draw the placed boxes
 		for (Shape shape : shapes)
 			if (shape.isVisible())
@@ -220,7 +210,13 @@ public class Game
 		if (temp.removeMe)
 			shapes.remove(temp);
 		if (player.y > 5000)
+		{
 			player.alive = false;
+			player.velocity = 0;
+			gravity = 0;
+			hangTime = 0;
+			currTime = getTime();
+		}
 		
 	}
 		

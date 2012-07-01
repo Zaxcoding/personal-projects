@@ -12,9 +12,15 @@ public class Player extends Shape
 {
 
 	boolean alive;
-	public double startX, startY;
+	public double startX, startY, velocity;
+	public double INIT_VELOCITY = -.83;	// for jumping
+	public double TRAMP_JUMP_AMOUNT = -1.5;
+
+
 	public int lives = 100;
 	public Checkpoint activeCheckpoint;
+	public double TERMINAL_VELOCITY = 9;
+	public boolean jumping = false, onTramp = false;
 	
 	public Player(double x, double y, double width, double height)
 	{
@@ -25,6 +31,15 @@ public class Player extends Shape
 		alive = true;
 		startX = x;
 		startY = y;
+	}
+	
+	public void jump()
+	{
+		jumping = true;
+		if (onTramp)
+			velocity += TRAMP_JUMP_AMOUNT;
+		else
+			velocity += INIT_VELOCITY;
 	}
 
 	public void setActiveCheckpoint(Checkpoint x)
@@ -83,13 +98,14 @@ public class Player extends Shape
 		if (activeCheckpoint != null)
 		{
 			startX = activeCheckpoint.x + activeCheckpoint.width/2;
-			startY = activeCheckpoint.y;
+			startY = activeCheckpoint.y - activeCheckpoint.height - height;
 		}
 		if (lives > 0)
 		{
 			x = startX;
 			y = startY;
 			alive = true;
+			dy = 0;
 		}
 		else
 			System.out.println("Game over");
@@ -100,6 +116,8 @@ public class Player extends Shape
 	{
 		if (!alive)
 			die();
+		if (dy > TERMINAL_VELOCITY)
+			dy = TERMINAL_VELOCITY;
 	}
 
 }

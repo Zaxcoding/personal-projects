@@ -116,12 +116,17 @@ public class LevelEditor
 						start = (int) mousex;
 					}
 					inputValue = JOptionPane.showInputDialog("Your start position is " + start + ". Enter an end position.");
-					int end = Integer.parseInt(inputValue);
-					inputValue = JOptionPane.showInputDialog("Speed? (typically pick a low integer value like 1-10)");
-					int speed = Integer.parseInt(inputValue);
-				
-					temp.setMovement(upDown, start, end, 1, speed);
-					shapes.add(temp);
+					if (inputValue != null  && !inputValue.equals(""))
+					{
+						int end = Integer.parseInt(inputValue);
+						inputValue = JOptionPane.showInputDialog("Speed? (typically pick a low integer value like 1-10)");
+						if (inputValue != null  && !inputValue.equals(""))
+						{
+						int speed = Integer.parseInt(inputValue);
+						temp.setMovement(upDown, start, end, 1, speed);
+						shapes.add(temp);
+						}
+					}
 				}
 			}
 			else if (currShape == "Teleporter" && !needDest)
@@ -145,6 +150,8 @@ public class LevelEditor
 			}
 			else if (currShape == "Checkpoint")
 				shapes.add(new Checkpoint(mousex, mousey, width, height));
+			else if (currShape == "Trampoline")
+				shapes.add(new Trampoline(mousex, mousey, width, height));
 		}
 		if (Mouse.isButtonDown(1))
 		{
@@ -190,6 +197,9 @@ public class LevelEditor
 			temp = new Teleporter(mousex, mousey, width, height);
 		else if (currShape == "Checkpoint")
 			temp = new Checkpoint(mousex, mousey, width, height);
+		else if (currShape == "Trampoline")
+			temp = new Trampoline(mousex, mousey, width, height);
+
 		
 		temp.draw();
 					
@@ -254,6 +264,8 @@ public class LevelEditor
 			currShape = "Teleporter";
 		if (Keyboard.isKeyDown(Keyboard.KEY_6))
 			currShape = "Checkpoint";
+		if (Keyboard.isKeyDown(Keyboard.KEY_7))
+			currShape = "Trampoline";
 		
 		
 		// IJKL to adjust height/width

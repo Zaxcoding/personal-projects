@@ -52,14 +52,12 @@ public class MovingPlatform extends Shape
 				direction *= -1;
 				System.out.println("FLIP");
 			}
-			System.out.println("y: " + y + "   top: " + top + "   bottom: " + bottom);
 		}
 		else
 		{
 			x += direction * speed;
 			if (x <= left || x >= right)
 				direction *= -1;
-			System.out.println(y);
 		}
 	}
 	
