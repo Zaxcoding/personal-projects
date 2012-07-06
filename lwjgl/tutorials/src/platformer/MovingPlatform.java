@@ -73,7 +73,7 @@ public class MovingPlatform extends Shape
 	@Override
 	public void draw()
 	{
-		glColor3d(1, 0, 0);
+		glColor3d(.7, .2, .4);
 		glRectd(x, y, x + width, y + height);
 		drawBorder();
 	}
@@ -131,6 +131,12 @@ public class MovingPlatform extends Shape
 	public boolean intersects(Shape other)
 	{
 		return false;
+	}
+
+	@Override
+	public void touch(Player player)
+	{
+		// do nothing
 	}
 
 }

@@ -8,20 +8,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class Trampoline extends Shape
+public class DeathStick extends Shape
 {
-	
-	public Trampoline(double x, double y, double width, double height)
+
+	public DeathStick(double x, double y, double width, double height)
 	{
 		super(x, y, width, height);
-		code = 7;
-		name = "Trampoline";
+		code = 8;
+		name = "Death Stick";
 	}
 
 	@Override
 	public void interact(Player player)
 	{
-		player.onTramp = true;
+		player.alive = false;
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class Trampoline extends Shape
 	@Override
 	public void draw()
 	{
-		glColor3d(.35, .28, .50);
+		glColor3d(1, 0, 0);
 		glRectd(x, y, x + width, y + height);
 		drawBorder();
 	}
@@ -41,7 +41,7 @@ public class Trampoline extends Shape
 	{
 		try
 		{
-			OS.writeInt(code);			// 7 is the code for Trampoline
+			OS.writeInt(code);			// 8 is the code for DeathStick
 			OS.writeDouble(x);
 			OS.writeDouble(y);
 			OS.writeDouble(width);
@@ -59,10 +59,10 @@ public class Trampoline extends Shape
 	
 	public Shape load(ObjectInputStream IS)
 	{
-		Trampoline temp = new Trampoline(0,0,0,0);
+		DeathStick temp = new DeathStick(0,0,0,0);
 		try
 		{
-			temp = new Trampoline(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
+			temp = new DeathStick(IS.readDouble(), IS.readDouble(), IS.readDouble(), IS.readDouble());
 		} catch (IOException e)
 		{
 			// TODO Auto-generated catch block
@@ -71,6 +71,7 @@ public class Trampoline extends Shape
 		
 		return temp;	
 	}
+
 	@Override
 	public boolean intersects(Shape other)
 	{
@@ -80,7 +81,7 @@ public class Trampoline extends Shape
 	@Override
 	public void touch(Player player)
 	{
-		// do nothing
+		player.alive = false;
 	}
 
 }

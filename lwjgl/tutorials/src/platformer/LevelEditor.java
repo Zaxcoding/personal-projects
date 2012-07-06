@@ -152,6 +152,8 @@ public class LevelEditor
 				shapes.add(new Checkpoint(mousex, mousey, width, height));
 			else if (currShape == "Trampoline")
 				shapes.add(new Trampoline(mousex, mousey, width, height));
+			else if (currShape == "Death Stick")
+				shapes.add(new DeathStick(mousex, mousey, width, height));
 		}
 		if (Mouse.isButtonDown(1))
 		{
@@ -199,12 +201,13 @@ public class LevelEditor
 			temp = new Checkpoint(mousex, mousey, width, height);
 		else if (currShape == "Trampoline")
 			temp = new Trampoline(mousex, mousey, width, height);
-
+		else if (currShape == "Death Stick")
+			temp = new DeathStick(mousex, mousey, width, height);
 		
 		temp.draw();
 					
 		glEnable(GL_BLEND);
-		            
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 		uniFont.drawString(-translate_x, -translate_y, "Mouse: " + Mouse.getX() + ","+(HEIGHT-Mouse.getY()-1));
 		uniFont.drawString(-translate_x, -translate_y + FONT_SIZE + 5, "Absolute: " + -translate_x + "," + translate_y);
 		if (startX != 0 && startY != 0)
@@ -266,6 +269,8 @@ public class LevelEditor
 			currShape = "Checkpoint";
 		if (Keyboard.isKeyDown(Keyboard.KEY_7))
 			currShape = "Trampoline";
+		if (Keyboard.isKeyDown(Keyboard.KEY_8))
+			currShape = "Death Stick";
 		
 		
 		// IJKL to adjust height/width

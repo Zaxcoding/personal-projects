@@ -101,5 +101,11 @@ public class Checkpoint extends Shape
 	{
 		return false;
 	}
+	
+	@Override
+	public void touch(Player player)
+	{
+		// do nothing
+	}
 
 }

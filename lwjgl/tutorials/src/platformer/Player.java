@@ -22,6 +22,8 @@ public class Player extends Shape
 	public double TERMINAL_VELOCITY = 9;
 	public boolean jumping = false, onTramp = false;
 	
+	public Shape groundPiece;
+	
 	public Player(double x, double y, double width, double height)
 	{
 		super(x, y, width, height);
@@ -31,11 +33,13 @@ public class Player extends Shape
 		alive = true;
 		startX = x;
 		startY = y;
+		groundPiece = null;
 	}
 	
 	public void jump()
 	{
 		jumping = true;
+		groundPiece = null;
 		if (onTramp)
 			velocity += TRAMP_JUMP_AMOUNT;
 		else
@@ -109,6 +113,7 @@ public class Player extends Shape
 		}
 		else
 			System.out.println("Game over");
+		jumping = false;
 	}
 
 	@Override
@@ -118,6 +123,12 @@ public class Player extends Shape
 			die();
 		if (dy > TERMINAL_VELOCITY)
 			dy = TERMINAL_VELOCITY;
+	}
+
+	@Override
+	public void touch(Player player)
+	{
+		//do nothing
 	}
 
 }

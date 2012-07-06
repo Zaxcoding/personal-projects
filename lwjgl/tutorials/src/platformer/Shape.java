@@ -1,9 +1,5 @@
 package platformer;
 
-import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glVertex2d;
 import static org.lwjgl.opengl.GL11.*;
 
 
@@ -34,6 +30,44 @@ public abstract class Shape
 	public abstract void save(ObjectOutputStream OS);
 	public abstract Shape load(ObjectInputStream IS);
 	public abstract boolean intersects(Shape other);
+	public abstract void touch(Player player);
+	
+	// basically a void method, but also a return for in onGround
+	public boolean collision(Player player)
+	{
+		boolean ans = false;
+		if (!this.name.equals("Player"))
+		{
+			double left = player.x;
+			double right = player.x + player.width;
+		
+			if ((left <= (this.x + this.width) && (right >= this.x)) 
+				&& (player.y > this.y)  && (player.y < this.y + this.height) )
+			{
+				// hit the bottom, stay under instead of flipping to the side
+				if (player.y + player.height >= this.y + this.height && player.jumping)
+				{
+			//		System.out.println("AAAAAAA");
+					player.y = this.y + this.height;
+					ans = true;
+				}
+				if (player.y + player.height < this.y + this.height)
+				{
+				boolean closerToLeft = player.x <= this.x + this.width/2;
+				if (closerToLeft)
+					player.x = this.x - player.width - 1;
+				else
+					player.x = this.x + this.width;
+				ans = true;
+				}
+			}
+		}
+		if (ans)
+			this.touch(player);
+		
+		return ans;
+	}
+
 	
 	public static Shape load(ObjectInputStream IS, int shapeCode)
 	{
@@ -50,6 +84,8 @@ public abstract class Shape
 			temp = new Checkpoint(0,0,0,0);
 		else if (shapeCode == 7)
 			temp = new Trampoline(0,0,0,0);
+		else if (shapeCode == 8)
+			temp = new DeathStick(0,0,0,0);
 		
 		temp = temp.load(IS);
 		return temp;
@@ -85,11 +121,6 @@ public abstract class Shape
 	public boolean isTouched()
 	{
 		return touched;
-	}
-	
-	public void touch()
-	{
-		touched = true;
 	}
 	
 	public void toggleVisibility()

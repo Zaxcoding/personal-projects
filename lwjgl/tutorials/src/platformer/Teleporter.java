@@ -130,5 +130,11 @@ public class Teleporter extends Shape
 	{
 		return false;
 	}
+	
+	@Override
+	public void touch(Player player)
+	{
+		// do nothing
+	}
 
 }

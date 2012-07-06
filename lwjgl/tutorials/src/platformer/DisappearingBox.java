@@ -83,4 +83,10 @@ public class DisappearingBox extends Shape
 	{
 	}
 
+	@Override
+	public void touch(Player player)
+	{
+		// do nothing
+	}
+	
 }

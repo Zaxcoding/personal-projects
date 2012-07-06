@@ -27,6 +27,7 @@ public class Game
 	public static final double ACCEL = .0022;			// for gravity
 	public static final double TERMINAL_VELOCITY = 200;	// for falling
 	public static final int COLLISION_HELP_VALUE = 50;	// for landing with great speed on small blocks
+	public static boolean WALLJUMPING = false;		// enable/disable walljumping
 	
 	private double hangTime = 0, currTime = 0, gravity = 0;
 	private float translateX = 50, translateY = 0;
@@ -57,14 +58,16 @@ public class Game
 			glTranslatef(translateX, 0, 0);
 			glTranslatef(0, translateY, 0);
 
+			
 			input();
 			grounded = onGround();
 			gravity();
 			
+			
 			update();
 			everybodyDoYourThing();
 			render();
-			
+						
 			glPopMatrix();
 
 			Display.update();
@@ -102,10 +105,6 @@ public class Game
 	
 	public void gravity()
 	{		
-		// sometimes things get crazy and this keeps it in check
-		if (player.y < -7E7 || player.y > 7E7)
-			player.y = startY;	
-		
 		if (!player.jumping && grounded)
 			currTime = getTime();
 		
@@ -115,15 +114,16 @@ public class Game
 			gravity = 0;
 			hangTime = 0;
 			getDelta();
+			player.dy = 0;
 			if (player.onTramp)
 			{
 				player.jump();
 				player.onTramp = false;
 			}
-			
 		}
-		else
+		else		
 		{
+			player.groundPiece = null;
 			gravity = ACCEL;
 			hangTime = getTime() - currTime;
 		}
@@ -138,25 +138,64 @@ public class Game
 	
 	public boolean onGround()
 	{
-		double left = player.x + player.width/2;
-		double right = player.x;
-		double bottom = player.y + player.height;
-						
-		for (Shape shape : shapes)
+		// if we're already on the ground, then just check that we're still on top of the groundPiece
+		// note the extra 3/4 width cushion for the player (to make it more fun)
+		if (player.groundPiece != null)
 		{
+			if ((player.groundPiece.x - player.width < player.x && 
+					(player.groundPiece.x + player.groundPiece.width > player.x)))
+			{
+				System.out.println("okay");
+				player.groundPiece.interact(player);
+				return true;
+			}
+		}
+		
+		// if we're not on the ground, time to see if we're on the ground somewhere else
+		for (Shape shape : shapes)
+		{	
 			// by default, make the value you look for the shape's height
 			double delta = shape.height;
-			// this helps with landing from great heights onto thin strips
 			
+			// this helps with landing from great heights onto thin strips
 			if (COLLISION_HELP_VALUE >= shape.height)
 				delta = COLLISION_HELP_VALUE;
-			if ((shape.x <= left && (shape.x + shape.width >= right)) &&
-					((-delta <= bottom - shape.y - shape.height) && (bottom - shape.y - shape.height <= 5))
-					&& !shape.user && !player.jumping)
+			
+			int COLLISION_HELP_2 = 15;
+			
+		/*	if ((shape.x - player.width*3/4 < player.x && 
+					(shape.x + shape.width > player.x + player.width*3/4)))			
+			// we're lined up with something, now to see if we're on it
 			{
-				player.y = shape.y - player.height;
-				shape.interact(player);
-				return true;
+				if (lastY + player.height < shape.y)	// if we were before the top
+					if (player.y + player.height > shape.y - 1) // and now we're below it
+						if (!shape.user && !player.jumping)
+						{
+							player.y = shape.y - player.height;
+							shape.interact(player);
+							player.groundPiece = shape;
+							System.out.println(shape.y);
+							return true;		// then we hit it
+						}
+			}
+		*/
+			
+			if ((shape.x < player.x + player.width*1/4  && 
+				(shape.x + shape.width > player.x + player.width*3/4)) &&	
+					(/*(-delta <= bottom - shape.y - shape.height) && */
+						shape.y + shape.height + COLLISION_HELP_2 > player.y + player.height
+						&& (player.y + player.height > shape.y - 1))
+	 				&& !shape.user && !player.jumping)
+			{	
+	
+	//			if (!shape.collision(player))
+	//		{
+				//	System.out.println("RESET: " + (player.y + player.height) + "  " + (shape.y + shape.height));
+					player.y = shape.y - player.height;
+					shape.interact(player);
+					player.groundPiece = shape;
+					return true;
+			//	}
 			}
 		}
 		return false;
@@ -206,6 +245,7 @@ public class Game
 				Checkpoint temp2 = (Checkpoint) shape;
 				temp2.active = false;
 			}
+			shape.collision(player);
 		}
 		if (temp.removeMe)
 			shapes.remove(temp);
