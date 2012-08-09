@@ -5,9 +5,11 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.io.*;
 
+import entities.Entity;
+
 public abstract class Shape
 {
-	protected boolean visible, touched, selected, user, removeMe = false;
+	protected boolean visible = true, touched, selected, user, removeMe = false;
 	protected double dx, dy, x, y, width, height;
 	protected int code;
 	protected String name;
@@ -86,6 +88,11 @@ public abstract class Shape
 			temp = new Trampoline(0,0,0,0);
 		else if (shapeCode == 8)
 			temp = new DeathStick(0,0,0,0);
+		else if (shapeCode == 9)
+			temp = new Ice(0,0,0,0);
+		else if (shapeCode == 10)
+			temp = new Coin(0,0,0,0);
+		
 		
 		temp = temp.load(IS);
 		return temp;

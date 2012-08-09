@@ -50,6 +50,8 @@ public class LevelEditor
 	private boolean needDest = false;
 	private Teleporter tempTeleporter;
 	
+	private boolean mouseLockX = false, mouseLockY = false;
+	
 	public LevelEditor() 
 	{	
 		
@@ -83,8 +85,10 @@ public class LevelEditor
 	public void mouse()
 	{
 		// Retrieve the "true" coordinates of the mouse.
-		mousex = Mouse.getX() - translate_x;
-		mousey = HEIGHT - Mouse.getY() - 1 - translate_y;
+		if (!mouseLockX)
+			mousex = Mouse.getX() - translate_x;
+		if (!mouseLockY)
+			mousey = HEIGHT - Mouse.getY() - 1 - translate_y;
 					
 		if (Mouse.isButtonDown(0))
 		{
@@ -154,6 +158,11 @@ public class LevelEditor
 				shapes.add(new Trampoline(mousex, mousey, width, height));
 			else if (currShape == "Death Stick")
 				shapes.add(new DeathStick(mousex, mousey, width, height));
+			else if (currShape == "Ice")
+				shapes.add(new Ice(mousex, mousey, width, height));
+			else if (currShape == "Coin")
+				shapes.add(new Coin(mousex, mousey, width, height));
+			
 		}
 		if (Mouse.isButtonDown(1))
 		{
@@ -203,6 +212,10 @@ public class LevelEditor
 			temp = new Trampoline(mousex, mousey, width, height);
 		else if (currShape == "Death Stick")
 			temp = new DeathStick(mousex, mousey, width, height);
+		else if (currShape == "Ice")
+			temp = new Ice(mousex, mousey, width, height);
+		else if (currShape == "Coin")
+			temp = new Coin(mousex, mousey, width, height);
 		
 		temp.draw();
 					
@@ -271,6 +284,10 @@ public class LevelEditor
 			currShape = "Trampoline";
 		if (Keyboard.isKeyDown(Keyboard.KEY_8))
 			currShape = "Death Stick";
+		if (Keyboard.isKeyDown(Keyboard.KEY_9))
+			currShape = "Ice";
+		if (Keyboard.isKeyDown(Keyboard.KEY_0))
+			currShape = "Coin";
 		
 		
 		// IJKL to adjust height/width
@@ -291,9 +308,17 @@ public class LevelEditor
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_DELETE) || Keyboard.isKeyDown(Keyboard.KEY_BACK))
-		{
 			delete();
-		}
+		
+		// for making it easier to place blocks in a straight line
+		if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))
+			mouseLockY = true;
+		else
+			mouseLockY = false;
+		if (Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
+			mouseLockX = true;
+		else
+			mouseLockX = false;		
 		}	// from the else way up
 	}
 	

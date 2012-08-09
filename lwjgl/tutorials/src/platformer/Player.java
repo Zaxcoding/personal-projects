@@ -20,7 +20,10 @@ public class Player extends Shape
 	public int lives = 100;
 	public Checkpoint activeCheckpoint;
 	public double TERMINAL_VELOCITY = 9;
-	public boolean jumping = false, onTramp = false;
+	public boolean jumping = false, onTramp = false, onIce = false, running = false;
+	public int direction = 0;	// 0 for still, -1 for left, 1 for right
+	
+	public int score = 0;
 	
 	public Shape groundPiece;
 	
@@ -123,6 +126,10 @@ public class Player extends Shape
 			die();
 		if (dy > TERMINAL_VELOCITY)
 			dy = TERMINAL_VELOCITY;
+		if (groundPiece == null)
+			onIce = false;
+		else if (groundPiece.name != "Ice")
+			onIce = false;
 	}
 
 	@Override

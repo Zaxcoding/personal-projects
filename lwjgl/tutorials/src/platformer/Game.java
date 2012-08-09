@@ -24,9 +24,9 @@ public class Game
 	public static final int THICKNESS = 2;			// the thickness you adjust by
 	public static final int FONT_SIZE = 25;			// font size of the x,y coords.
 	public static final int MOVEMENT_AMOUNT = 5;	// for moving left, right, and translating
+	public static final int COLLISION_HELP_2 = 15;	// for help landing from great heights
 	public static final double ACCEL = .0022;			// for gravity
 	public static final double TERMINAL_VELOCITY = 200;	// for falling
-	public static final int COLLISION_HELP_VALUE = 50;	// for landing with great speed on small blocks
 	public static boolean WALLJUMPING = false;		// enable/disable walljumping
 	
 	private double hangTime = 0, currTime = 0, gravity = 0;
@@ -34,6 +34,8 @@ public class Game
 	private float startX, startY;
 	private int width = 25, height = 25, gravityMod = 1;	// gravityMod = 1 for normal, -1 for reverse
 	private long lastFrame;
+	
+	private double cameraL, cameraR, cameraU, cameraD;
 		
 	private List<Shape> shapes = new ArrayList<Shape>(20);
 	private UnicodeFont uniFont;
@@ -63,6 +65,7 @@ public class Game
 			grounded = onGround();
 			gravity();
 			
+			System.out.println("Score: " + player.score);
 			
 			update();
 			everybodyDoYourThing();
@@ -132,6 +135,7 @@ public class Game
 				
 		player.setDY(player.velocity + gravity*hangTime*gravityMod);
 		player.update(getDelta());
+		
 		translateY = (float) (HEIGHT/2 - player.y);
 		translateX = (float) (WIDTH/2 - player.x);
 	}
@@ -145,7 +149,6 @@ public class Game
 			if ((player.groundPiece.x - player.width < player.x && 
 					(player.groundPiece.x + player.groundPiece.width > player.x)))
 			{
-				System.out.println("okay");
 				player.groundPiece.interact(player);
 				return true;
 			}
@@ -153,49 +156,17 @@ public class Game
 		
 		// if we're not on the ground, time to see if we're on the ground somewhere else
 		for (Shape shape : shapes)
-		{	
-			// by default, make the value you look for the shape's height
-			double delta = shape.height;
-			
-			// this helps with landing from great heights onto thin strips
-			if (COLLISION_HELP_VALUE >= shape.height)
-				delta = COLLISION_HELP_VALUE;
-			
-			int COLLISION_HELP_2 = 15;
-			
-		/*	if ((shape.x - player.width*3/4 < player.x && 
-					(shape.x + shape.width > player.x + player.width*3/4)))			
-			// we're lined up with something, now to see if we're on it
-			{
-				if (lastY + player.height < shape.y)	// if we were before the top
-					if (player.y + player.height > shape.y - 1) // and now we're below it
-						if (!shape.user && !player.jumping)
-						{
-							player.y = shape.y - player.height;
-							shape.interact(player);
-							player.groundPiece = shape;
-							System.out.println(shape.y);
-							return true;		// then we hit it
-						}
-			}
-		*/
-			
+		{				
 			if ((shape.x < player.x + player.width*1/4  && 
 				(shape.x + shape.width > player.x + player.width*3/4)) &&	
-					(/*(-delta <= bottom - shape.y - shape.height) && */
-						shape.y + shape.height + COLLISION_HELP_2 > player.y + player.height
-						&& (player.y + player.height > shape.y - 1))
-	 				&& !shape.user && !player.jumping)
+					(shape.y + shape.height + COLLISION_HELP_2 > player.y + player.height) &&
+						 (player.y + player.height > shape.y - 1) &&
+						 	!shape.user && !player.jumping)
 			{	
-	
-	//			if (!shape.collision(player))
-	//		{
-				//	System.out.println("RESET: " + (player.y + player.height) + "  " + (shape.y + shape.height));
 					player.y = shape.y - player.height;
 					shape.interact(player);
 					player.groundPiece = shape;
 					return true;
-			//	}
 			}
 		}
 		return false;
@@ -214,14 +185,16 @@ public class Game
 		hangTime = 0;
 	}
 	
-	public void moveLeft(Shape player)
+	public void moveLeft(Player player)
 	{
-		player.x -= MOVEMENT_AMOUNT;
+		if (!player.onIce)
+			player.x -= MOVEMENT_AMOUNT;
 	}
 	
-	public void moveRight(Shape player)
+	public void moveRight(Player player)
 	{
-		player.x += MOVEMENT_AMOUNT;
+		if (!player.onIce)
+			player.x += MOVEMENT_AMOUNT;
 	}
 	
 	public void render()
@@ -256,8 +229,7 @@ public class Game
 			gravity = 0;
 			hangTime = 0;
 			currTime = getTime();
-		}
-		
+		}		
 	}
 		
 	private long getTime()
@@ -302,6 +274,8 @@ public class Game
 	
 	public void load(List<Shape> shapes, String filename)
 	{
+		if (filename == null)
+			System.exit(0);
 		try
 		{
 			// clear the array
@@ -325,10 +299,11 @@ public class Game
 			System.out.println("Loaded!");
 		} catch (FileNotFoundException e)
 		{
-			e.printStackTrace();
+			System.out.println("Didn't find that level.");
+			loadLevel();
 		} catch (IOException e)
 		{
-			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 	
