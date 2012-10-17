@@ -1,4 +1,4 @@
-kickass-code-for-cool-people
+personal-projects
 ============================
 
-Personal projects I work on- ProjectEuler, Yahtzee, C/C++, etc.
+Fun things I worked on over the summer and in my free time, when I'm not programming for school.
